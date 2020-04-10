@@ -9,4 +9,33 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 * [Learn LaTeX in 30 minutes](https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes) - Guida sul LaTeX realizzata da OverLeaf
 
 ## Workflow
-Andando nella sezione Projects qui sopra potrete vedere chi sta lavorando su cosa e aggiungere lavori da fare.
+Spiegazione delle sezioni principali di questa repository e come utilizzarle
+
+### Issues
+Qui è dove si possono creare i compiti da fare, o segnalare errori trovati nel documento (Issues).
+Inoltre si può assegnare chi deve svolgere il compito e discutere con gli altri su quello specifico compito.
+
+### Pull request
+Se create una copia su cui lavorare da soli (magari fare delle prove) e poi volete riunire le modifiche nel progetto principale, dovete creare in questa sezione una pull request. Qui si può discutere assieme di accettare (anche parzialmente) le modifiche nel progetto principale.
+
+### Actions
+Qui si possono configura azione che github svolge in automatico al posto nostro. Nel nostro caso potremmo fare in modo che ogni volta che viene modificato il codice sorgente in latex lui crei o aggiorni il corrispondente documento in pdf.
+
+### Projects
+Qui si possono vedere tutte le pullrequest suddivide in progetti (nel nostro caso è solo uno per tutte le Issues).
+Sono suddivise in tre sezioni: quelle da fare, quelle in progresso e quelle fatte. In questo modo potremo vedere in tempo reale l'andamento del progetto e chi deve fare cosa. Questa sezione viene aggiornata automaticamente (anche se in realtà si possono spostare pure manualmente).
+
+## Altre sezioni
+Spiegazione delle altre sezioni di questa repo (io non ne ho trovato un'applicazione al nostro caso, ma comunque voi potreste trovarla).
+
+### Wiki
+La wikipedia/documentazione della nostra repository.
+
+### Security
+Dove vengono segnalate vulnerabilità al nostro progetto.
+
+### Insights
+Overview sul nostro progetto e i nostri contributi.
+
+### Settings
+Le impostazioni della repo.
