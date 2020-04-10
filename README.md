@@ -9,7 +9,7 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 * [Learn LaTeX in 30 minutes](https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes) - Guida sul LaTeX realizzata da OverLeaf
 
 ## Workflow
-Git funziona come i rami (branch) di un albero. C'è il branch master, che sarebbe il principale. Noi possiamo creare il nostro branch a partire da un altro per effettuare modifiche senza influenzare il primo. Quando vogliamo siamo sicuri che il nostro branch funzioni a dovere possiamo unirlo a quello principale con una pull request. Volendo potremmo lavorare direttamente tutti sul branch master.
+Git funziona come i rami (branch) di un albero. C'è il branch master, che sarebbe il principale. Noi possiamo creare il nostro branch a partire da un altro per effettuare modifiche senza influenzare il primo. Quando siamo sicuri che il nostro branch funzioni a dovere possiamo unirlo a quello principale con una pull request. Volendo potremmo lavorare direttamente tutti sul branch master.
 Spiegazione delle sezioni principali di questa repository e come utilizzarle.
 
 ### Issues
