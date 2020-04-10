@@ -9,7 +9,8 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 * [Learn LaTeX in 30 minutes](https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes) - Guida sul LaTeX realizzata da OverLeaf
 
 ## Workflow
-Spiegazione delle sezioni principali di questa repository e come utilizzarle
+Git funziona come i rami (branch) di un albero. C'è il branch master, che sarebbe il principale. Noi possiamo creare il nostro branch a partire da un altro per effettuare modifiche senza influenzare il primo. Quando vogliamo siamo sicuri che il nostro branch funzioni a dovere possiamo unirlo a quello principale con una pull request. Volendo potremmo lavorare direttamente tutti sul branch master.
+Spiegazione delle sezioni principali di questa repository e come utilizzarle.
 
 ### Issues
 Qui è dove si possono creare i compiti da fare, o segnalare errori trovati nel documento (Issues).
@@ -27,7 +28,6 @@ Sono suddivise in tre sezioni: quelle da fare, quelle in progresso e quelle fatt
 
 ## Altre sezioni
 Spiegazione delle altre sezioni di questa repo (io non ne ho trovato un'applicazione al nostro caso, ma comunque voi potreste trovarla).
-Un altra cosa importante di github è che funziona come i 'rami' di un albero: c'è il ramo principale (branch master) da cui poi possono partire altri rami (copie del branch master) che allora volta possono creare altri rami. I rami poi possono tornare a unirsi in quelli da cui sono nati attraverso le pull request. In ogni caso lo ho detto in questa sezione perchè il nostro progetto essendo piccolo non ha bisogno di altri rami, quindi direi di lavorare tutti sul branch master, ma se volete creare altri non succede nulla.
 
 ### Wiki
 La wikipedia/documentazione della nostra repository.
