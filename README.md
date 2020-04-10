@@ -16,7 +16,7 @@ Qui è dove si possono creare i compiti da fare, o segnalare errori trovati nel 
 Inoltre si può assegnare chi deve svolgere il compito e discutere con gli altri su quello specifico compito.
 
 ### Pull request
-Se create una copia su cui lavorare da soli (magari fare delle prove) e poi volete riunire le modifiche nel progetto principale, dovete creare in questa sezione una pull request. Qui si può discutere assieme di accettare (anche parzialmente) le modifiche nel progetto principale.
+Quando volete riunire le modifiche che avete apportato nel progetto principale, dovete creare in questa sezione una pull request. Qui si può discutere assieme di accettare (anche parzialmente) le modifiche nel progetto principale. Questo è utile soprattutto nel caso in cui più di uno di noi modifica la stessa parte del documento, in modo da scegliere quale committare (ovvero inviare).
 
 ### Actions
 Qui si possono configura azione che github svolge in automatico al posto nostro. Nel nostro caso potremmo fare in modo che ogni volta che viene modificato il codice sorgente in latex lui crei o aggiorni il corrispondente documento in pdf.
@@ -27,6 +27,7 @@ Sono suddivise in tre sezioni: quelle da fare, quelle in progresso e quelle fatt
 
 ## Altre sezioni
 Spiegazione delle altre sezioni di questa repo (io non ne ho trovato un'applicazione al nostro caso, ma comunque voi potreste trovarla).
+Un altra cosa importante di github è che funziona come i 'rami' di un albero: c'è il ramo principale (branch master) da cui poi possono partire altri rami (copie del branch master) che allora volta possono creare altri rami. I rami poi possono tornare a unirsi in quelli da cui sono nati attraverso le pull request. In ogni caso lo ho detto in questa sezione perchè il nostro progetto essendo piccolo non ha bisogno di altri rami, quindi direi di lavorare tutti sul branch master, ma se volete creare altri non succede nulla.
 
 ### Wiki
 La wikipedia/documentazione della nostra repository.
