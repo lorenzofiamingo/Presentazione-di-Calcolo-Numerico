@@ -1,6 +1,9 @@
 # Presentazione di Calcolo Numerico
 Presentazione sul metodo generalizzato dei minimi residui applicabile in un sottospazio di Krylov per la soluzione numerica di equazioni lineari non simmetriche.
 
+## Link al progetto su Overleaf
+* [Overleaf Editor](https://www.overleaf.com/project/5e7b600d038215000122e161)
+
 ## Materiale di supporto
 * [Numerical Linear Algebra](https://github.com/lorenzofiamingo/Presentazione-di-Calcolo-Numerico/raw/master/Materiale/Numerical%20Linear%20Algebra.pdf) - Focalizzarsi sulle pagine da 266 a 274
 * [Efficient Steady State Analysis based on Matrix-Free Krylov-Subspace Methods](https://github.com/lorenzofiamingo/Presentazione-di-Calcolo-Numerico/raw/master/Materiale/Efficient%20Steady%20State%20Analysis%20based%20on%20Matrix-Free%20Krylov-Subspace%20Methods.pdf) - Presentazione del DAC
