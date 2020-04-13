@@ -1,12 +1,34 @@
 name: Build LaTeX document
-on: [push]
+on:
+  push:
+    paths:
+    - '**.tex'
 jobs:
   build_latex:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
+        with:
+          ref: master
       - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@master
+        uses: dante-ev/latex-action@master
         with:
           root_file: presentazione.tex
+      - name: Check pdf file
+        run: |
+          file presentazione.pdf | grep -q ' PDF '
+      - uses: EndBug/add-and-commit@v4
+        with:
+          add: 'presentazione.pdf'
+          author_name: lorenzofiamingo
+          author_email: l99fiamingo@gmail.com
+          message: 'Generato automaticamente'
+          #remove: "./dir/old_file.js"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
