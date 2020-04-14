@@ -12,6 +12,7 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 * [Metodo del gradiente coniugato](https://it.wikipedia.org/wiki/Metodo_del_gradiente_coniugato) - Focalizzarsi su [Descrizione del metodo](https://it.wikipedia.org/wiki//Metodo_del_gradiente_coniugato#Descrizione_del_metodo)
 * [Discesa del gradiente](https://it.wikipedia.org/wiki/Discesa_del_gradiente) - Focalizzarsi su [Soluzione di sistemi lineari](https://it.wikipedia.org/wiki/Discesa_del_gradiente#Soluzione_di_sistemi_lineari) (dove calcola il passo
 <img src="https://render.githubusercontent.com/render/math?math=\alpha _{k}"> ottimale)
+### GMRES
 
 
 ## Link utili
