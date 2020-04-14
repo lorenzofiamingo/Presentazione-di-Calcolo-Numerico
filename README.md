@@ -7,6 +7,7 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 ## Materiale di supporto
 * [Numerical Linear Algebra](https://github.com/lorenzofiamingo/Presentazione-di-Calcolo-Numerico/raw/master/Materiale/Numerical%20Linear%20Algebra.pdf) - Focalizzarsi sulle pagine da 266 a 274
 * [Efficient Steady State Analysis based on Matrix-Free Krylov-Subspace Methods](https://github.com/lorenzofiamingo/Presentazione-di-Calcolo-Numerico/raw/master/Materiale/Efficient%20Steady%20State%20Analysis%20based%20on%20Matrix-Free%20Krylov-Subspace%20Methods.pdf) - Presentazione del DAC
+* [Templates for the Solution of Linear Systems: Building Blocks for Iterative Methods](http://www.netlib.org/templates/templates.pdf) - Raccolta di algoritmi di risoluzione tra GMRES e il Metodo del gradiente coniugato
 * [The Applications of Matrices | What I wish my teachers told me way earlier](https://www.youtube.com/watch?v=rowWM-MijXU) - Video su comprensione intuitiva di matrici e autovettori attraverso esempi reali.
 ### Metodo del gradiente coniugato
 * [Introduction to Numerical Methods (Week 8)](https://ocw.mit.edu/courses/mathematics/18-335j-introduction-to-numerical-methods-spring-2019/week-8/) - Pagina web del MIT contenente informazioni e link utili su metodo del Gradiente Coniugato, convergenza dell'algoritmo del Gradiente Coniugato e algoritmo del Gradiente Biconiugato
