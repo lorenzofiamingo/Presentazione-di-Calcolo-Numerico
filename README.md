@@ -12,7 +12,9 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 * [Metodo del gradiente coniugato](https://it.wikipedia.org/wiki/Metodo_del_gradiente_coniugato) - Focalizzarsi su [Descrizione del metodo](https://it.wikipedia.org/wiki//Metodo_del_gradiente_coniugato#Descrizione_del_metodo)
 * [Discesa del gradiente](https://it.wikipedia.org/wiki/Discesa_del_gradiente) - Focalizzarsi su [Soluzione di sistemi lineari](https://it.wikipedia.org/wiki/Discesa_del_gradiente#Soluzione_di_sistemi_lineari) (dove calcola il passo
 <img src="https://render.githubusercontent.com/render/math?math=\alpha _{k}"> ottimale)
+* [Introduction to Numerical Methods (Week 8)](https://ocw.mit.edu/courses/mathematics/18-335j-introduction-to-numerical-methods-spring-2019/week-8/) - Pagina web del MIT contenente informazioni e link utili su metodo del Gradiente Coniugato, convergenza dell'algoritmo del Gradiente Coniugato e algoritmo del Gradiente Biconiugato
 ### GMRES
+* [Introduction to Numerical Methods (Week 7)](https://ocw.mit.edu/courses/mathematics/18-335j-introduction-to-numerical-methods-spring-2019/week-7/) - Pagina web del MIT contenente informazioni e link utili su metodo di Krilov, algoritmo di Arnoldi, algoritmo GMRES, convergenza dell'algoritmo di Arnoldi e convergenza dell'algoritmo GMRES
 
 
 ## Link utili
