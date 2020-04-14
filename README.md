@@ -9,12 +9,13 @@ Presentazione sul metodo generalizzato dei minimi residui applicabile in un sott
 * [Efficient Steady State Analysis based on Matrix-Free Krylov-Subspace Methods](https://github.com/lorenzofiamingo/Presentazione-di-Calcolo-Numerico/raw/master/Materiale/Efficient%20Steady%20State%20Analysis%20based%20on%20Matrix-Free%20Krylov-Subspace%20Methods.pdf) - Presentazione del DAC
 * [The Applications of Matrices | What I wish my teachers told me way earlier](https://www.youtube.com/watch?v=rowWM-MijXU) - Video su comprensione intuitiva di matrici e autovettori attraverso esempi reali.
 ### Metodo del gradiente coniugato
+* [Introduction to Numerical Methods (Week 8)](https://ocw.mit.edu/courses/mathematics/18-335j-introduction-to-numerical-methods-spring-2019/week-8/) - Pagina web del MIT contenente informazioni e link utili su metodo del Gradiente Coniugato, convergenza dell'algoritmo del Gradiente Coniugato e algoritmo del Gradiente Biconiugato
 * [Metodo del gradiente coniugato](https://it.wikipedia.org/wiki/Metodo_del_gradiente_coniugato) - Focalizzarsi su [Descrizione del metodo](https://it.wikipedia.org/wiki//Metodo_del_gradiente_coniugato#Descrizione_del_metodo)
 * [Discesa del gradiente](https://it.wikipedia.org/wiki/Discesa_del_gradiente) - Focalizzarsi su [Soluzione di sistemi lineari](https://it.wikipedia.org/wiki/Discesa_del_gradiente#Soluzione_di_sistemi_lineari) (dove calcola il passo
 <img src="https://render.githubusercontent.com/render/math?math=\alpha _{k}"> ottimale)
-* [Introduction to Numerical Methods (Week 8)](https://ocw.mit.edu/courses/mathematics/18-335j-introduction-to-numerical-methods-spring-2019/week-8/) - Pagina web del MIT contenente informazioni e link utili su metodo del Gradiente Coniugato, convergenza dell'algoritmo del Gradiente Coniugato e algoritmo del Gradiente Biconiugato
 ### GMRES
 * [Introduction to Numerical Methods (Week 7)](https://ocw.mit.edu/courses/mathematics/18-335j-introduction-to-numerical-methods-spring-2019/week-7/) - Pagina web del MIT contenente informazioni e link utili su metodo di Krilov, algoritmo di Arnoldi, algoritmo GMRES, convergenza dell'algoritmo di Arnoldi e convergenza dell'algoritmo GMRES
+* [GMRES e BICGSTAB: due metodi iterativi per risolvere sistemi lineari di grandi dimensioni](http://profs.scienze.univr.it/~caliari/aa1213/calcolo_scientifico/GMRESBICGSTAB.pdf) - Lezione sul GMRES dell'Università degli studi di Verona
 
 
 ## Link utili
