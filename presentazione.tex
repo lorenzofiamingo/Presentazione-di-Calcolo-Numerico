@@ -6,9 +6,8 @@
 \setbeamertemplate{bibliography item}{\insertbiblabel}
 \setbeamertemplate{caption}[numbered]
 \hypersetup{colorlinks,linkcolor=,urlcolor=mycyan}
-\usepackage{animate,xcolor,colortbl,listings,nicefrac}
+\usepackage{animate,xcolor,colortbl,nicefrac}
 \usepackage[italian]{babel}
-
 \usepackage{listings}
 \lstset{upquote=false}
 \usepackage[]{framed}
@@ -16,54 +15,434 @@
 
 
 \begin{frame}
-  \title{GMRES}
-  \subtitle{Metodo generalizzato dei minimi residui applicabile in un sottospazio di Krylov per la soluzione numerica di equazioni lineari non simmetriche.}
-  \date{19/03/2020}
-  \author[Principal]{Fabio Archenti \and Fabio Camagni \and Andrea Favero \and  \\Lorenzo Fiamingo \and Stefano Galivanone \and Nazariy Nashkolnyy}
+  \title{Metodi di Krylov}
+  \subtitle{Metodi per la soluzione numerica di sistemi di equazioni lineari non simmetriche applicabili in un sottospazio di Krylov.}
+  \date{29/04/2020}
+  \author[Principal]{Fabio Archenti \and Fabio Camagni \and Andrea Favero \and  \\Lorenzo Fiamingo \and Stefano Gallivanone \and Nazariy Nashkolnyy}
   \maketitle
 \end{frame}
 
-
 \begin{frame}
-
-La presentazione deve iniziare con la lista del materiale
-bibliografico utilizzato. Questo è un esempio di come inserire 
-un libro o un articolo nella bibliografia.
-  \frametitle{Bibliografia}
-  \begin{thebibliography}{99}\small
+    \frametitle{Bibliografia}
     
+  \begin{thebibliography}{99}\small
     \bibitem{quarteroni2012calcolo}
     Quarteroni, Saleri, and Gervasio.
     \newblock {\em Calcolo Scientifico: Esercizi e problemi risolti con MATLAB e  Octave}.
     \newblock UNITEXT. Springer Milan, 2012.
 
-    \bibitem{Cagnoni2013}
-    Cagnoni, Agostini, Christen, Parolini, Stevanovi{\'c}, and de~Falco.
-    \newblock Multiphysics simulation of corona discharge induced ionic wind.
-    \newblock {\em Journal of Applied Physics}, 114(23), 2013.
-
-   \bibitem{africa2017simultaneous}
-   Africa, de~Falco, Maddalena, Caironi, and Natali.
-   \newblock Simultaneous extraction of density of states width, carrier mobility
-   and injection barriers in organic semiconductors.
-   \newblock {\em Scientific reports}, 7(1):1--11, 2017.
+    \bibitem{trefethen-bau}
+    Trefethen, and Bau.
+    \newblock {\em Numerical Linear Algebra}.
+    \newblock SIAM, 1997.
+    
+   
+   \bibitem{dac95}
+   Telichevesky, Kundert, and White.
+   \newblock {\em Efficient Steady-State Analysis based on Matrix-Free Krylov-Subspace Methods}.
+   \newblock {\em Scientific report}, June 1995.
 
    \end{thebibliography}
 
-Una volta inserito un documento in bibliografia, 
-può essere citato così:~\cite{quarteroni2012calcolo}
+%Una volta inserito un documento in bibliografia, 
+%può essere citato così:~\cite{quarteroni2012calcolo}
   
 \end{frame}  
 
 \begin{frame}
   \frametitle{Sommario}
-  Questo comando inserisce una lista delle sezioni in
-  cui è divisa la presentazione. Perché una sezione appaia 
-  nel sommario deve contenere almeno una pagina.
+  %Questo comando inserisce una lista delle sezioni in
+  %cui è divisa la presentazione. Perché una sezione appaia 
+  %nel sommario deve contenere almeno una pagina.
   \tableofcontents
 \end{frame}
 
-\section{Prima sezione}\label{sec:sec1}
+\section{Introduzione}\label{sec:sec1}
+
+%\begin{frame} \frametitle{Motivazioni}
+%\begin{itemize}
+%    \item Utilizziamo allora i metodi iterativi (subspaziali di Krylov), il cui scopo è minimizzare la norma del residuo partendo da una soluzione approssimata.
+%\end{itemize}
+%\end{frame}
+
+\begin{frame} \frametitle{Introduzione}
+\begin{itemize}
+    \item I metodi di Krylov risolvono sistemi lineari A$\mathbf{x}=\mathbf{b}$, dove:
+    \begin{itemize}
+    \item $A\in\mathbb{C}^{n\times n}$ è una matrice quadrata
+    \item $\mathbf{x}\in\mathbb{C}^{n}$ è il vettore incognita
+    \item $\mathbf{b}\in\mathbb{C}^{n}$ è il vettore dei termini noti
+    \end{itemize}
+    \item Ad ogni passo dell'iterazione viene calcolata una soluzione approssimata $\mathbf{x}_k$ appartenente al sottospazio di Krylov:
+    \item Si definisce \alert{sottospazio di Krylov} il sottospazio generato:
+    $$
+    \mathcal{K}_\mathrm{n}(A,\mathbf{b})=span\{\mathbf{b},A\mathbf{b},A^2\mathbf{b},\dots,A^{n-1}\mathbf{b}\}\text{, } n\geq1
+    $$.
+    %\begin{itemize}
+   % \item A causa dell'applicazione del metodo delle potenze è probabile che i vettori diventino linearmente dipendenti: sono quindi necessari metodi di ortogonalizzazione.
+    %\end{itemize}
+    
+\end{itemize}
+\end{frame} 
+
+\begin{frame} \frametitle{Introduzione (II)}
+\begin{itemize}
+    \item $\mathbf{x}_0$ è la \alert{guess} iniziale al passo $0$.
+    \item Definiamo la \alert{soluzione} del sistema cercata $$\mathbf{x}^*=A^{-1}\mathbf{b}$$
+    \item Definiamo il \alert{residuo} del sistema al passo $k$
+    $$\mathbf{r}_k =\mathbf{b}-A\mathbf{x}_k$$
+    \item Definiamo l'\alert{errore} del sistema al passo $k$
+    $$\mathbf{e}_k =\mathbf{x}_k-\mathbf{x}^*$$
+    Possiamo notare come $\mathbf{r}_k=-A^{-1}\mathbf{e}_k$.
+\end{itemize}
+\end{frame} 
+
+
+
+
+\begin{frame} \frametitle{Metodi di discesa}
+\begin{itemize}
+    \item Data A matrice simmetrica e definita positiva, possiamo definire la funzione (detta \alert{forma quadratica}) $\phi:\mathbb{R}^n \to \mathbb{R}$ $$\phi(\mathbf{x})=\frac{1}{2}\mathbf{x}^TA\mathbf{x}-\mathbf{x}^T\mathbf{b}$$
+    \item Questa funzione (se le ipotesi su A sono verificate) è una funzione convessa e ammette un unico punto $\mathbf{x}^{\ast}$ di \alert{minimo assoluto}.
+    
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=.25\linewidth]{cg_quad.png}
+    \caption{Forma quadratica per una matrice definita positiva}
+    \label{fig:quad}
+\end{figure}
+\end{frame}
+
+\begin{frame} \frametitle{Metodi di discesa (II)}
+ \begin{itemize}
+ \item Calcolo del \alert{gradiente} di $\phi(\mathbf{x})$: $\nabla\phi(\mathbf{x}) = A\mathbf{x}-\mathbf{b}$ (con $\nabla(\mathbf{b}^T\mathbf{x}) = \mathbf{b}$ e $\nabla(\mathbf{x}^T A \mathbf{x}) = 2A\mathbf{x}$).
+ 
+ \item Nel punto $\mathbf{x}^{\ast}$ il gradiente si annulla:  $\nabla \phi(\mathbf{x}^{\ast})=A\mathbf{x}^{\ast}-\mathbf{b}=\mathbf{0}$.
+ Risolvere il problema di minimo su $\phi(\mathbf{x})$ (trovando $\mathbf{x}^{\ast}$) equivale quindi a risolvere il sistema A$\mathbf{x}=\mathbf{b}$.
+
+ \item Assegnato un $\mathbf{x}_0\in \mathbb{R}^n$, si procede per ogni $\mathit{k}$ fino a convergenza:
+    \begin{enumerate}
+        \item determinando una direzione di discesa $\mathbf{d_k} \in \mathbb{R}^n$
+        \item determinando un passo $\alpha_k\in \mathbb{R}$
+        \item ponendo $\mathbf{x}_{k+1}=\mathbf{x}_{k}+\alpha_k\mathbf{d}_{k}$
+    \end{enumerate}
+    
+ %\item Condizioni per direzione di discesa: %per una funzione $\phi$ è un vettore d tale che: (in un punto x generico) 
+  %   \begin{enumerate}
+   %     \item $\mathbf{d}^T\nabla\phi(\mathbf{x}) < 0$, se $\nabla\phi(\mathbf{x})  != 0$
+    %    \item $\mathbf{d} = \mathbf{0}$, se $\nabla\phi(\mathbf{x}) = 0$
+%    \end{enumerate}
+
+    \item L'approccio sarà lo stesso per il metodo del Gradiente e per il metodo del Gradiente Coniugato, ma sceglieremo direzioni di discesa $\mathbf{d}_{k}$ diverse per ogni metodo.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Metodo del Gradiente}
+
+\begin{itemize}
+    \item Per il metodo del Gradiente la direzione $\mathbf{d}_k$ è il residuo $\mathbf{r}_k =\mathbf{b}-A\mathbf{x}_k$.
+    
+    \item $\nabla\phi(\mathbf{x}) = A\mathbf{x} - \mathbf{b}$: $\mathbf{d}_k = \mathbf{r}_k = - \nabla\phi(\mathbf{x})$.
+    
+    \item Si può dimostrare che il passo di discesa ottimale è $\alpha_k=\frac{\mathbf{d}_k^T \mathbf{r}_k}{\mathbf{d}_k^T A \mathbf{d}_k}$.
+    
+    \item Si aggiorna la soluzione: $\mathbf{x}_{k+1}=\mathbf{x}_{k}+\alpha_k\mathbf{d}_{k}$.
+    
+    \item E infine si aggiorna il residuo: $\mathbf{r}_{k+1}=\mathbf{r}_{k}-\alpha_kA\mathbf{d}_{k}$.
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=.25\linewidth]{cg_grad.png}
+    \caption{Iterazioni del metodo del gradiente}
+    \end{figure}    
+\end{frame}
+
+\section{Metodo del Gradiente Coniugato}\label{sec:sec2}
+\begin{frame} \frametitle{Metodo del Gradiente Coniugato - Passo di discesa}
+\begin{itemize}
+
+\item Il \alert{passo di discesa} più conveniente (che minimizza $\phi(\mathbf{x_{k+1}})$) è
+$$\alpha_k=\frac{\mathbf{d}_k^T \mathbf{r}_k}{\mathbf{d}_k^T A \mathbf{d}_k}$$ .
+
+\item Dimostrazione:
+\begin{itemize}
+    \item Sostituendo la soluzione al passo $k+1$ $\mathbf{x}_{k+1}=\mathbf{x}_{k}+\alpha_k\mathbf{d}_{k}$ nella forma quadratica
+    $$\phi(\mathbf{x_{k+1}})=\phi(\mathbf{\mathbf{x}_{k}+\alpha_k\mathbf{d}_{k}})=
+    \frac{1}{2}\left(\mathbf{d}_k^TA\mathbf{d}_k\right)\alpha_k^2
+    -\mathbf{d}_k^T\underbrace{\left(\mathbf{b}-A\mathbf{x}_k\right)}_{=\mathbf{r}_k}\alpha_k
+    +\frac{1}{2}\mathbf{x}_k^TA\mathbf{x}_k
+    -\mathbf{x}_k^T\mathbf{b}
+    $$
+    
+    \item Derivando e imponendo la condizione di stazionarietà
+    $$
+    \frac{d\phi}{d\alpha_k}(\mathbf{\mathbf{x}_{k}+\alpha_k\mathbf{d}_{k}})=
+    \left(\mathbf{d}_k^TA\mathbf{d}_k\right)\alpha_k
+    -\mathbf{d}_k^T\mathbf{r}_k=0
+    $$
+    \item Ricaviamo $\alpha_k$ ottenendo la formula cercata.
+    
+    \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Calcolo del residuo}
+\begin{itemize}
+
+\item Calcoliamo il \alert{residuo} $\mathbf{r}_k =\mathbf{b}-A\mathbf{x}_k$:
+$$\mathbf{r}_{k+1}=\mathbf{r}_k-\alpha_kA\mathbf{d}_{k}$$ .
+
+\item Dimostrazione:
+\begin{itemize}
+    \item $\mathbf{r}_{k+1}=-A\mathbf{e}_{k+1}$
+    \item $\mathbf{r}_{k+1}=-A\left(\mathbf{e}_k+\alpha_k\mathbf{d}_k \right)$
+    \item $\mathbf{r}_{k+1}=\mathbf{r}_k-\alpha_kA\mathbf{d}_{k}$
+    
+    \end{itemize}
+
+\item Questa formula, in caso di matrici di grandi dimensioni, potrebbe essere soggetta ad errori di troncamento. Una buona soluzione potrebbe essere l'utilizzare $\mathbf{r}_k =\mathbf{b}-A\mathbf{x}_k$ dopo alcune iterazioni.
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Direzione di discesa}
+\begin{itemize}
+%\item Affinchè $\{\mathbf{d}_k\}$ siano $A$-ortogonali e ottenute a partire da $\{\mathbf{r}_k\}$  $\mathbf{d}_{j}^TA\mathbf{d}_{k+1}=\mathbf{r}_{k+1}^T\mathbf{d}_j=\mathbf{0}$ per $j=0,\dots,k$
+\item Utilizziamo l'\alert{ortogonalizzazione di Gram-Schmidt} per ottenere direzioni $\{\mathbf{d}_k\}$ $A$-ortogonali a partire dai residui $\{\mathbf{r}_k\}$
+\begin{itemize}
+\item $\mathbf{d}_0=\mathbf{r}_0$
+\item $\mathbf{d}_{k+1}=\mathbf{r}_{k+1}+\sum_{h=0}^k\beta_{kh}\mathbf{d}_h$
+\end{itemize}
+\item Dato che $A\mathcal{K}_k$ è incluso in $\mathcal{K}_{k+1}$, il fatto che $\mathbf{r}_{k+1}$ sia ortogonale a $\mathcal{K}_{k+1}$ implica che $\mathbf{r}_{k+1}$ sia $A$-ortogonale a $A\mathcal{K}_k$, e quindi a tutte le precedenti direzioni di discesa $\mathbf{d}$, esclusa $\mathbf{d}_k$. 
+\item Di conseguenza \alert{non sarà necessario memorizzare le vecchie direzioni} per assicurare la $A$-ortogonalità delle nuove.
+\item La \alert{direzione di discesa} diviene
+$$
+\mathbf{d}_{k+1}=\mathbf{r}_{k+1}+\beta_{k+1}\mathbf{d}_k
+$$
+dove
+$$
+\beta_{k+1}=\frac{\mathbf{r}_{k+1}^T\mathbf{r}_{k+1}}{\mathbf{r}_{k}^T\mathbf{r}_{k}}
+$$
+\end{itemize}
+\end{frame}
+
+
+%\begin{frame} \frametitle{Scelta della direzione di discesa}
+%\begin{itemize}
+    
+%    \item Scegliamo ad ogni passo una direzione $A$-ortogonale rispetto a tutte le direzioni precedenti, cioè tale che $(A\mathbf{d}_{j})^T\mathbf{d}_{k+1}=\mathbf{0}$ e $(\mathbf{r}_{k+1})^T\mathbf{d}_j=\mathbf{0}$ con $j=0,\dots,k$.
+    
+ %   \item All'inizio $\mathbf{d}_0=\mathbf{r}_0$, poi $(\mathbf{d}_{k+1})=\mathbf{r}_{k+1}-\beta_k\mathbf{d}_k$ per $k=0,\dots,n-1$, con $\beta_k=\frac{(A\mathbf{d}_{k})^T\mathbf{r}_{k+1}}{(A\mathbf{d}_{k})^T\mathbf{d}_{k}}$ (scelta ottimale).
+    
+ %   \item In questo modo le $\mathbf{d}_k$ sono linearmente indipendenti e la soluzione $\mathbf{x}_{k+1}$ è ottimale rispetto a tutte le direzioni di discesa (ovvero $\mathbf{r}_{k+1}$ è ortogonale a $\mathbf{d}_k$): è garantito che $\mathbf{x}_n=\mathbf{x}^{\ast}$.
+%\end{itemize}
+%\end{frame}
+
+\begin{frame} \frametitle{Passo di discesa (II)}
+\begin{figure}
+    \centering
+    \includegraphics[width=.75\linewidth]{cg_ort.png}
+    \caption{Il piano scuro è il sottospazio $\mathcal{K}_2$. Notiamo che $\mathbf{r_2}$ e $\mathbf{d}_2$ puntano su un piano parallelo a $\mathcal{K}_2$ (come conseguenza dell'ortogonalizzazione)}
+    \label{fig:ortogonalizzazione}
+\end{figure}
+\begin{itemize}
+\item Dalla Figura~\ref{fig:ortogonalizzazione} $\mathbf{d}_k^T\mathbf{r}_k=\mathbf{r}_k^T\mathbf{r}_k$, riscriviamo il passo di discesa come
+$$
+\alpha_k=\frac{\mathbf{r}_k^T \mathbf{r}_k}{\mathbf{d}_k^T A \mathbf{d}_k}
+$$
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Velocità di convergenza}
+\begin{itemize}
+    \item Il metodo del gradiente coniugato converge al massimo in $\mathrm{n}$ iterazioni (in aritmetica esatta), e si ottiene che $$\|\mathbf{e}_{(k)}\|_A\leq\frac{2c^k}{1+c^{2k}}\|\mathbf{e}_{(0)}\|_A$$
+    $$\|\mathbf{e}_{(k)}\|_A\leq2c^k\|\mathbf{e}_{(0)}\|_A$$
+    $$ c=\frac{\sqrt{K(A)}-1}{\sqrt{K(A)}+1}.$$
+    $$K(A)\text{ è il numero di condizionamento in norma 2 di } A$$
+    
+    \item Come metodo iterativo, viene arrestato quando il residuo relativo $E_{(k)}=\frac{\|\mathbf{r}_{(k)}\|}{\|\mathbf{r}_{(0)}\|}$ è minore di una tolleranza data. 
+\end{itemize}
+\end{frame}
+
+
+%\begin{frame}
+%\frametitle{Metodo del Gradiente Coniugato come Metodo di Krylov}
+%\begin{itemize}
+    %\item Il metodo del Gradiente Coniugato può essere visto come un particolare metodo di Krylov: la soluzione $\mathbf{x}^{\ast}$ appartiene al sottospazio di Krylov $\mathcal{K}_\mathrm{n}(A,\mathbf{r}_{(0)})$, e ad ogni iterazione anumenta di dimensione. 
+    %\item Le condizioni di ortogonalita del vettore residuo rispetto alle n direzioni di discesa sono espresse nel sottospazio  $\mathcal{L}_\mathrm{n}\subseteq \mathbb{R}^n$, generato da queste ultime (che sono poste indipendenti tra loro): $$\mathcal{L}_\mathrm{n}=span\{ \mathbf{d}_{(0)},\dots,\mathbf{d}_{(n-1)} \} $$.
+    
+%\end{itemize}
+%\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Precondizionamento (I)}
+\begin{itemize}
+    \item La velocità di convergenza dipende quindi dal numero di condizionamento $\mathit{K(A)}$. %più è grande ka piu lenta conv.
+    
+    \item Per accelerare la convergenza dobbiamo diminuire il numero di condizionamento ($K(P^{-1}A)\ll K(A)$)
+    \item Possiamo risolvere il \alert{sistema precondizionato} (equivalente a quello dato, $A\mathbf{x}=\mathbf{b}$)
+    $$
+    M^{-1}A\mathbf{x}=M^{-1}\mathbf{b}
+    $$
+    \item In generale se $M$ e $A$ sono simmetriche e definite non è detto che lo sia $M^{-1}A$, ma per ogni $M$ simmetrica, definita positiva esiste almeno una matrice $P$ tale che $PP^T=M$.
+    \item Dato che $M^{-1}A$ e $P^{-1}AP^T$ hanno gli stessi autovalori possiamo scrivere il sistema equivalente
+    $$
+    P^{-1}AP^{-T}\mathbf{\hat{x}}=P^{-1}\mathbf{b},\, \mathbf{\hat{x}}=P^T\mathbf{x}
+    $$
+    
+    \item $P^{-1}AP^{-T}$ è simmetrica e definita positiva.
+    
+\end{itemize}    
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Precondizionamento (II)}
+\begin{itemize}
+    \item Per tornare al caso del primo sistema precondizionato sfruttiamo l'equazione $M^{-1}=P^{-T}P^{-1}$
+    \item Scegliendo $M$ stiammo operando un \textit{trade-off} tra la diminuzione del numero di condizionamento e il costo computazionale della risoluzione del sistema $\mathbf{s_{(k)}}=M^{-1}\mathbf{r_{(k)}}$ per trovare il residuo precondizionato $\mathbf{s_{(k)}}$.
+   
+    \item Esempio di algoritmi applicabili per calcolare $M$ sono:
+    \begin{itemize}
+    \item Precondizionamento di Jacobi
+    \item Precondizionamento incompleto di Cholesky
+    \end{itemize}    
+   
+    \item  La convergenza del metodo precondizionato è più veloce, poichè $K(A)$ è stato sostituito con $K(P^{-1}A)$: 
+    $$\|\mathbf{e}_{(k)}\|_A\leq\frac{2c^k}{1+c^{2k}}\|\mathbf{e}_{(0)}\|_A,  c=\frac{\sqrt{K(P^{-1}A)}-1}{\sqrt{K(P^{-1}A)}+1}.$$
+\end{itemize}    
+\end{frame}
+
+\begin{frame}
+\frametitle{Metodo del gradiente coniugato (senza precondizionamento)}
+\begin{itemize}
+\item $\mathbf{d}_0=\mathbf{r}_0=\mathbf{b}-A\mathbf{x}_0$
+\item $\alpha_k=\frac{\mathbf{r}_k^T \mathbf{r}_k}{\mathbf{d}_k^T A \mathbf{d}_k}$
+\item $\mathbf{x}_{k+1}=\mathbf{x}_k+\alpha_k\mathbf{d}_{k}$
+\item $\mathbf{r}_{k+1}=\mathbf{r}_k-\alpha_kA\mathbf{d}_{k}$
+\item $\beta_{k+1}=\frac{\mathbf{r}_{k+1}^T\mathbf{r}_{k+1}}{\mathbf{r}_{k}^T\mathbf{r}_{k}}$
+\item $\mathbf{d}_{k+1}=\mathbf{r}_{k+1}+\beta_{k+1}\mathbf{d}_k$
+\end{itemize}    
+\end{frame}
+
+\begin{frame}\frametitle{Implementazione Matlab (senza precondizionamento)}
+
+Dati come input
+una matrice \lstinline[language=Matlab]{A}, 
+il vettore dei termini noti \lstinline[language=Matlab]{b},
+una guess iniziale \lstinline[language=Matlab]{x},
+un numero massimo di iterazioni \lstinline[language=Matlab]{kmax}
+e una tolleranza \lstinline[language=Matlab]{e}
+\lstinputlisting[language=Matlab]{gradienteconiugato.m}
+\end{frame}
+
+\begin{frame}
+\frametitle{Metodo del gradiente coniugato (con precondizionamento)}
+\begin{itemize}
+\item $\mathbf{r}_0=\mathbf{b}-A\mathbf{x}_0$
+\item $\mathbf{d}_0=M^{-1}\mathbf{r}_0$
+\item $\alpha_k=\frac{\mathbf{r}_k^TM^{-1} \mathbf{r}_k}{\mathbf{d}_k^T A \mathbf{d}_k}$
+\item $\mathbf{x}_{k+1}=\mathbf{x}_k+\alpha_k\mathbf{d}_{k}$
+\item $\mathbf{r}_{k+1}=\mathbf{r}_k-\alpha_kA\mathbf{d}_{k}$
+\item $\beta_{k+1}=\frac{\mathbf{r}_{k+1}^TM^{-1}\mathbf{r}_{k+1}}{\mathbf{r}_{k}^TM^{-1}\mathbf{r}_{k}}$
+\item $\mathbf{d}_{k+1}=M^{-1}\mathbf{r}_{k+1}+\beta_{k+1}\mathbf{d}_k$
+\end{itemize}    
+\end{frame}
+
+\begin{frame}\frametitle{Implementazione Matlab (con precondizionamento)}
+Dati come input
+una matrice \lstinline[language=Matlab]{A}, 
+il vettore dei termini noti \lstinline[language=Matlab]{b},
+una guess iniziale \lstinline[language=Matlab]{x},
+la matrice di precondizionamento \lstinline[language=Matlab]{M},
+un numero massimo di iterazioni \lstinline[language=Matlab]{kmax}
+e una tolleranza \lstinline[language=Matlab]{e}
+\lstinputlisting[language=Matlab]{gradienteconiugatoprecondizionato.m}
+\end{frame}
+
+\begin{frame}
+\frametitle{Considerazioni finali}
+    Vantaggi
+    \begin{itemize}
+        \item Possibilità di implementare questi metodi in versione \textit{matrix-free}, ovvero ad ogni iterazione basta solo calcolare un prodotto matrice-vettore, e altre operazioni meno computazionalmente costose. %quindi possiamo allocare meno memoria, e questo è buono quando ci sono problemi di grandi dimensioni, ed è utile x parallelismo su più cpu.
+        \item Convergenza del metodo del gradiente coniugato in meno iterazioni rispetto alla dimensione n della matrice A (calcolando invece la soluzione attraverso Cramer o con i metodi diretti ci sono operazioni matrice-matrice che possono risultare molto dispendiose).
+        \item Se la matrice è \alert{sparsa}, è possibile memorizzare i suoi elementi a un costo limitato ($O(n)$ invece di $O(n^2)$). Non è detto però i suoi fattori siano matrici sparse, quindi non è consigliabile applicare metodi di fattorizzazione.
+        \end{itemize}
+    Svantaggi
+    \begin{itemize}
+        \item In quanto metodi iterativi, sono soggetti a errori di troncamento. %ci si ferma ad un certo k
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Confronto Gradiente - Gradiente Coniugato}
+    \begin{figure}
+    \centering
+    \includegraphics[width=.35\linewidth]{cg_comp.png}
+    \caption{Confronto tra il numero di iterazioni dei due metodi}
+Come si può osservare dalla figura, il metodo del Gradiente (in verde) esegue molte più iterazioni rispetto alle (sole!) due del metodo del Gradiente Coniugato. 
+\end{figure}
+\end{frame}
+
+\section{GMRES}\label{sec:sec3}
+
+\begin{frame} \frametitle{Metodo GMRES}
+\begin{itemize}
+    \item \textbf{GMRES} (General Minimal RESidual) è uno dei metodi di Krylov utilizzato per risolvere il sistema lineare $Ax = b$ tramite il sottospazio
+    $\mathcal{K}_\mathrm{n}$ in modo tale da rendere minima la norma Euclidea del residuo: $$\|\mathbf{b}-A\mathbf{x_n}\|_2.$$
+    
+    \item Sia $K_n$ la matrice $m x n$ di Krylov, composta da spazi colonne A$\mathcal{K}_\mathrm{n}$. Inanzitutto si moltiplica $K_n$ per A, per cui il problema diventa trovare un vettore $\mathbf{c}\in\mathbb{C}^n$, tale per cui il residuo $\|AK_n\mathbf{c}-\mathbf{b}\|_2$ sia minimo. 
+    
+    \item Questa formula è risolvibile con fattorizzazione QR, ma $AK_n$ diventa \textbf{numericamente instabile} al crescere di $n$, quindi si utilizza \alert{l'iterazione di Arnoldi} per costruire una base di vettori ortonormali.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{L'iterazione di Arnoldi (I)}
+\begin{itemize}
+    \item Si definisce $Q_n$ come la matrice, i cui vettori formano una base di $\mathcal{K}_\mathrm{n}$. Il problema consiste ora nella ricerca di $\mathbf{y}\in\mathbb{C}^n$ tale per cui: $$\|AQ_n\mathbf{y}-\mathbf{b}\|_2 = minimo,$$ riducendo così le dimensioni del problema da $m x n$ a $(n+1) x n$.
+    
+    \item L'iterazione di Arnoldi dimostra che $AQ_n = Q_{n+1}\mathcal{H}_n$ (con $\mathcal{H}_n$ la matrice alta-sinistra, $(n+1) x n$, della matrice di Hessenberg). Il problema quindi diventa:$$\|Q_n\mathcal{H}_n\mathbf{y}-\mathbf{b}\|_2 = minimo.$$ 
+
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{L'iterazione di Arnoldi (II)}
+\begin{itemize}
+    \item Moltiplicando entrambi i membri per $Q^*_{n+1}$ si ottiene: $$\|\mathcal{H}_n\mathbf{y}-Q^*_{n+1}\mathbf{b}\|_2 = minimo.$$
+    
+    \item Si osserva che $Q^*_{n+1}\mathbf{b}=\|\mathbf{b}\|\mathbf{e_1}$, con $\mathbf{e_1}=(1,0,0,\dots)^*$, quindi il problema 
+    finale è:$$\|\mathcal{H}_n\mathbf{y}-\|\mathbf{b}\|\mathbf{e_1}\|_2 = minimo.$$ Questa equazione è risolvibile con l'approssimazione ai minimi quadrati.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{GMRES Polinomi}
+\begin{itemize}
+    \item Il metodo GMRES è utilizzabile anche nel calcolo polinomiale.
+    
+    \item Dato $p_n\in P_n$, con $p_n(0)=1$ si definisce $x_n=q_n(A)\mathbf{b}$ e $r_n=p_n(A)\mathbf{b}$. Il problema consiste nel calcolare $p_n\in P_n$ tale che $$\|r_n\|=minimo.$$
+
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Velocità di convergenza}\framesubtitle{Quanto deve valere \textbf{n} (numero di iterazioni) per soddisfare la tolleranza?}
+    $$ \frac{\|r_n\|}{\|\mathbf{b}\|}  < tolleranza$$
+\begin{itemize}
+    \item Osservazione 1: convergenza monotona $\|r_{n+1}\|\leq \|r_n\|$.
+    \item Osservazione 2: per $n\to \infty$, $\|r_{\infty} \|= 0$, a meno di errori di arrotondamento.
+    
+    \item Essendo $\|r_n\| = \|p_n(A)\|\|\mathbf{b}\|$ risulta che solo $p_n(A)$ influenza la velocità di convergenza: $$\frac{\|r_n\|}{\|\mathbf{b}\|} \leq inf\|p_n(A)\|,$$ con $p_n \in P_n$.
+
+\end{itemize}
+\end{frame}
+
 
 \begin{frame} \frametitle{Come inserire una formula}
 Una formula può essere inserita all'interno del testo così : 
@@ -93,7 +472,7 @@ oppure un elenco numerato
 
 \end{frame}
 
-\section{Seconda sezione}\label{sec:sec2}
+
 
 \begin{frame} \frametitle{Come inserire un pezzo di codice}
 Si può evidenziare \alert{parte del testo} in questo modo.
@@ -109,7 +488,7 @@ Si possono inserire solo alcune righe del file in questo modo :
 
 \end{frame}
 
-\section{Terza sezione}\label{sec:sec3}
+
 
 \begin{frame} \frametitle{Come inserire una figura}
 Questo è un esempio di come inserire una figura
