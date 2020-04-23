@@ -200,6 +200,17 @@ applicazione nel calcolo polinomiale\\ \\
 
 
 \begin{frame}
+\frametitle{Matrix Free GMRES}\framesubtitle{Esempio applicativo del metodo: \textbf{circuiti analogici}}
+\begin{itemize}
+\item Più circuiti $\to$ più problemi per risolverli
+\item Risposta del circuito dipende dagli ingressi (ampiezze, frequenze) $\to$ migliaia di punti da verificare
+\item N equazioni $\to$ $N^3$ flops per Gauss, $N^2$ flops per metodi iterativi
+\item Matrix-Free VS Iterativi: se N=400 $t_{It} \approx 10t_{MF}$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
 \frametitle{Matrix Free GMRES}\framesubtitle{Algoritmo per calcolare la distorsione nei circuiti analogici}
 %[CANCELLA](cerco stato stazionario periodico = le variabili di stato non dipendono dal tempo)[CANCELLA]
 \begin{itemize}
@@ -270,7 +281,7 @@ $\|r^k\| = \|\mathbf{b} - A\mathbf{x}^k\|$ minimo\\
 $k = k + 1$\\
 \} while($\|r^k\| < tolerance_{GMRES}$)\\
 $\mathbf{x}^k = soluzione$
-    
+  
 \end{frame}
 
 \begin{frame}
@@ -293,7 +304,12 @@ Così facendo il calcolo di $J_\phi p^{k-1}$ richiede circa N operazioni\footnot
 \end{equation}
 %\item [CANCELLA](vedi frase dac 95 sotto la(12))[CANCELLA]
 \item L'algoritmo utilizzato per risolvere la (12) richiede lo stesso numero di operazioni necessario a calcolare una sola colonna di $J_\phi$ con il metodo di Newton
+\item Salvare $\mathbf{C}(\mathbf{v}_m)$ e fattorizzare LU $J_f(\mathbf{v}_m)$ ad ogni passo per applicare:
 \end{itemize}
+\begin{equation}
+J_f(\mathbf{v}_m)\frac{d\mathbf{v}_m}{d\mathbf{v}_0} = \frac{\mathbf{C}(\mathbf{v}_{m-1})}{h_m}\frac{d\mathbf{v}_{m-1}}{d\mathbf{v}_0}
+\tag{11}
+\end{equation}  
 \end{frame}
 
 
