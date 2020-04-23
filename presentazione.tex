@@ -70,7 +70,7 @@
     \item I metodi di Krylov risolvono sistemi lineari A$\mathbf{x}=\mathbf{b}$, dove:
     \begin{itemize}
     \item $A\in\mathbb{C}^{n\times n}$ è una matrice quadrata
-    \item $\mathbf{x}\in\mathbb{C}^{n}$ è il vettore incognita
+    \item $\mathbf{x}\in\mathbb{C}^{n}$ è il vettore delle incognite
     \item $\mathbf{b}\in\mathbb{C}^{n}$ è il vettore dei termini noti
     \end{itemize}
     \item Ad ogni passo dell'iterazione viene calcolata una soluzione approssimata $\mathbf{x}_k$ appartenente al sottospazio di Krylov:
@@ -154,7 +154,7 @@
 \end{itemize}
 \begin{figure}
     \centering
-    \includegraphics[width=.25\linewidth]{cg_grad.png}
+    \includegraphics[width=.4\linewidth]{cg_grad.png}
     \caption{Iterazioni del metodo del gradiente}
     \end{figure}    
 \end{frame}
@@ -369,166 +369,277 @@ e una tolleranza \lstinline[language=Matlab]{e}
 
 \begin{frame}
 \frametitle{Considerazioni finali}
-    Vantaggi
-    \begin{itemize}
-        \item Possibilità di implementare questi metodi in versione \textit{matrix-free}, ovvero ad ogni iterazione basta solo calcolare un prodotto matrice-vettore, e altre operazioni meno computazionalmente costose. %quindi possiamo allocare meno memoria, e questo è buono quando ci sono problemi di grandi dimensioni, ed è utile x parallelismo su più cpu.
-        \item Convergenza del metodo del gradiente coniugato in meno iterazioni rispetto alla dimensione n della matrice A (calcolando invece la soluzione attraverso Cramer o con i metodi diretti ci sono operazioni matrice-matrice che possono risultare molto dispendiose).
-        \item Se la matrice è \alert{sparsa}, è possibile memorizzare i suoi elementi a un costo limitato ($O(n)$ invece di $O(n^2)$). Non è detto però i suoi fattori siano matrici sparse, quindi non è consigliabile applicare metodi di fattorizzazione.
-        \end{itemize}
     Svantaggi
     \begin{itemize}
         \item In quanto metodi iterativi, sono soggetti a errori di troncamento. %ci si ferma ad un certo k
     \end{itemize}
+    Vantaggi
+    \begin{itemize}
+        \item Possibilità di implementare questi metodi in versione \textit{matrix-free}, ovvero ad ogni iterazione basta solo calcolare un prodotto matrice-vettore, e altre operazioni meno computazionalmente costose. %quindi possiamo allocare meno memoria, e questo è buono quando ci sono problemi di grandi dimensioni, ed è utile x parallelismo su più cpu.
+        \item Se la matrice è \alert{sparsa}, è possibile memorizzare i suoi elementi a un costo limitato ($O(n)$ invece di $O(n^2)$). Non è detto però i suoi fattori siano matrici sparse, quindi non è consigliabile applicare metodi di fattorizzazione.
+        
+    \end{itemize}
+    %Confronto
+    %\begin{itemize}
+        %\item Convergenza del metodo del gradiente coniugato in meno iterazioni rispetto alla dimensione n della matrice A (calcolando invece la soluzione attraverso Cramer o con i metodi diretti ci sono operazioni matrice-matrice che possono risultare molto dispendiose).
+        %\end{itemize}
 \end{frame}
 
 \begin{frame}{Confronto Gradiente - Gradiente Coniugato}
     \begin{figure}
     \centering
     \includegraphics[width=.35\linewidth]{cg_comp.png}
-    \caption{Confronto tra il numero di iterazioni dei due metodi}
-Come si può osservare dalla figura, il metodo del Gradiente (in verde) esegue molte più iterazioni rispetto alle (sole!) due del metodo del Gradiente Coniugato. 
+    \caption{Confronto tra il numero di iterazioni dei due metodi )in verde il gradiente e in rosso il gradiente coniugato)}
+Come si può osservare dalla figura, il metodo del Gradiente esegue molte più iterazioni rispetto al  metodo del Gradiente Coniugato. 
 \end{figure}
 \end{frame}
 
 \section{GMRES}\label{sec:sec3}
 
-\begin{frame} \frametitle{Metodo GMRES}
-\begin{itemize}
-    \item \textbf{GMRES} (General Minimal RESidual) è uno dei metodi di Krylov utilizzato per risolvere il sistema lineare $Ax = b$ tramite il sottospazio
-    $\mathcal{K}_\mathrm{n}$ in modo tale da rendere minima la norma Euclidea del residuo: $$\|\mathbf{b}-A\mathbf{x_n}\|_2.$$
-    
-    \item Sia $K_n$ la matrice $m x n$ di Krylov, composta da spazi colonne A$\mathcal{K}_\mathrm{n}$. Inanzitutto si moltiplica $K_n$ per A, per cui il problema diventa trovare un vettore $\mathbf{c}\in\mathbb{C}^n$, tale per cui il residuo $\|AK_n\mathbf{c}-\mathbf{b}\|_2$ sia minimo. 
-    
-    \item Questa formula è risolvibile con fattorizzazione QR, ma $AK_n$ diventa \textbf{numericamente instabile} al crescere di $n$, quindi si utilizza \alert{l'iterazione di Arnoldi} per costruire una base di vettori ortonormali.
 
+\begin{frame} 
+\begin{center}
+\begin{tabular}{ c }
+\hline\\
+\textbf{Generalized Minimal RESidual} \\ [0.5ex]
+risoluzione di un sistema lineare tramite sottospazio di Krylov\\ \\
+ \hline
+\end{tabular}
+\end{center}
+\end{frame}
+
+
+\begin{frame} \frametitle{GMRES}
+\begin{itemize}
+    \item \textbf{GMRES} (Generalized Minimal RESidual) è uno dei metodi di Krylov utilizzato per risolvere il sistema lineare $Ax = b$ tramite il sottospazio
+    $\mathcal{K}_\mathrm{n}$ in modo tale da rendere minima la norma Euclidea del residuo: $$\|\mathbf{b}-A\mathbf{x_n}\|_2.$$
+    \item Sia $K_n$ la matrice $m x n$ di Krylov, composta da spazi colonne A$\mathcal{K}_\mathrm{n}$. Inanzitutto si moltiplica $K_n$ per A, per cui il problema diventa trovare un vettore $\mathbf{c}\in\mathbb{C}^n$, tale per cui il residuo $\|AK_n\mathbf{c}-\mathbf{b}\|_2$ sia minimo. 
+    \item Questa formula è risolvibile con fattorizzazione QR, ma $AK_n$ diventa \textbf{numericamente instabile} al crescere di $n$, quindi si utilizza \alert{l'iterazione di Arnoldi} per costruire una base di vettori ortonormali.
 \end{itemize}
 \end{frame}
+
 
 \begin{frame} \frametitle{L'iterazione di Arnoldi (I)}
 \begin{itemize}
-    \item Si definisce $Q_n$ come la matrice, i cui vettori formano una base di $\mathcal{K}_\mathrm{n}$. Il problema consiste ora nella ricerca di $\mathbf{y}\in\mathbb{C}^n$ tale per cui: $$\|AQ_n\mathbf{y}-\mathbf{b}\|_2 = minimo,$$ riducendo così le dimensioni del problema da $m x n$ a $(n+1) x n$.
-    
-    \item L'iterazione di Arnoldi dimostra che $AQ_n = Q_{n+1}\mathcal{H}_n$ (con $\mathcal{H}_n$ la matrice alta-sinistra, $(n+1) x n$, della matrice di Hessenberg). Il problema quindi diventa:$$\|Q_n\mathcal{H}_n\mathbf{y}-\mathbf{b}\|_2 = minimo.$$ 
-
+    \item Si definisce $Q_n$ come la matrice, i cui vettori formano una base ortonormale di $\mathcal{K}_\mathrm{n}$. Il problema consiste ora nella ricerca di $\mathbf{y}\in\mathbb{C}^n$ tale per cui: $$\|AQ_n\mathbf{y}-\mathbf{b}\|_2 = minimo,$$ riducendo così le dimensioni del problema da $m x n$ a $(n+1) x n$.
+    \item L'iterazione di Arnoldi dimostra che $AQ_n = Q_{n+1}\mathcal{H}_n$ (con $\mathcal{H}_n$ la matrice alta-sinistra, $(n+1) x n$, della matrice di Hessenberg). Il problema quindi diventa:$$\|Q_{n+1}\mathcal{H}_n\mathbf{y}-\mathbf{b}\|_2 = minimo.$$ 
 \end{itemize}
 \end{frame}
+
 
 \begin{frame} \frametitle{L'iterazione di Arnoldi (II)}
 \begin{itemize}
     \item Moltiplicando entrambi i membri per $Q^*_{n+1}$ si ottiene: $$\|\mathcal{H}_n\mathbf{y}-Q^*_{n+1}\mathbf{b}\|_2 = minimo.$$
-    
     \item Si osserva che $Q^*_{n+1}\mathbf{b}=\|\mathbf{b}\|\mathbf{e_1}$, con $\mathbf{e_1}=(1,0,0,\dots)^*$, quindi il problema 
     finale è:$$\|\mathcal{H}_n\mathbf{y}-\|\mathbf{b}\|\mathbf{e_1}\|_2 = minimo.$$ Questa equazione è risolvibile con l'approssimazione ai minimi quadrati.
-
 \end{itemize}
 \end{frame}
 
-\begin{frame} \frametitle{GMRES Polinomi}
+
+\begin{frame} 
+\begin{center}
+\begin{tabular}{ c }
+\hline\\
+\textbf{Generalized Minimal RESidual} \\ [0.5ex]
+applicazione nel calcolo polinomiale\\ \\
+ \hline
+\end{tabular}
+\end{center}
+\end{frame}
+
+
+\begin{frame} 
+\frametitle{GMRES Polinomi}
 \begin{itemize}
     \item Il metodo GMRES è utilizzabile anche nel calcolo polinomiale.
-    
     \item Dato $p_n\in P_n$, con $p_n(0)=1$ si definisce $x_n=q_n(A)\mathbf{b}$ e $r_n=p_n(A)\mathbf{b}$. Il problema consiste nel calcolare $p_n\in P_n$ tale che $$\|r_n\|=minimo.$$
-
 \end{itemize}
 \end{frame}
+
 
 \begin{frame} \frametitle{Velocità di convergenza}\framesubtitle{Quanto deve valere \textbf{n} (numero di iterazioni) per soddisfare la tolleranza?}
     $$ \frac{\|r_n\|}{\|\mathbf{b}\|}  < tolleranza$$
 \begin{itemize}
     \item Osservazione 1: convergenza monotona $\|r_{n+1}\|\leq \|r_n\|$.
     \item Osservazione 2: per $n\to \infty$, $\|r_{\infty} \|= 0$, a meno di errori di arrotondamento.
-    
-    \item Essendo $\|r_n\| = \|p_n(A)\|\|\mathbf{b}\|$ risulta che solo $p_n(A)$ influenza la velocità di convergenza: $$\frac{\|r_n\|}{\|\mathbf{b}\|} \leq inf\|p_n(A)\|,$$ con $p_n \in P_n$.
-
+    \item Essendo $\|r_n\| = \|p_n(A) \mathbf{b}\| \leq\|p_n(A)\|\|\mathbf{b}\|$ risulta che solo $p_n(A)$ influenza la velocità di convergenza: $$\frac{\|r_n\|}{\|\mathbf{b}\|} \leq inf\|p_n(A)\|,$$ con $p_n \in P_n$.
 \end{itemize}
 \end{frame}
 
 
-\begin{frame} \frametitle{Come inserire una formula}
-Una formula può essere inserita all'interno del testo così : 
-$-\nabla \left( \varepsilon \nabla u \right) = f $ oppure 
-centrata e numerata così:
-\begin{equation}\label{eq:poisson}
-    -\nabla \cdot \left( \varepsilon \nabla u \right) = f
-\end{equation}
-oppure centrata senza numerazione così :
-$$
- -\nabla \cdot \left( \varepsilon \nabla u \right) = f
-$$
-Posso fare riferimento alle formule numerate così : \eqref{eq:poisson}
+\begin{frame} 
+\begin{center}
+\begin{tabular}{ c }
+\hline\\
+ \textbf{Analisi stazionaria efficiente} \\ [0.5ex]
+  \textbf{basata sul metodo matrix-free nei sottospazi di Krylov}\\ \\
+ \hline
+\end{tabular}
+\end{center}
 \end{frame}
 
-\begin{frame} \frametitle{Come inserire una lista per punti}
-Ecco come inserire una lista per puti
+
+\begin{frame}
+\frametitle{Matrix Free GMRES}\framesubtitle{Esempio applicativo del metodo: \textbf{circuiti analogici}}
 \begin{itemize}
-    \item un punto
-    \item un altro
+\item Più circuiti $\to$ più problemi per risolverli
+\item Risposta del circuito dipende dagli ingressi (ampiezze, frequenze) $\to$ migliaia di punti da verificare
+\item N equazioni $\to$ $N^3$ flops per Gauss, $N^2$ flops per metodi iterativi
+\item Matrix-Free VS Iterativi: se N=400 $t_{It} \approx 10t_{MF}$
 \end{itemize}
-oppure un elenco numerato
-\begin{enumerate}
-    \item primo punto
-    \item secondo punto
-\end{enumerate}
-
 \end{frame}
 
 
-
-\begin{frame} \frametitle{Come inserire un pezzo di codice}
-Si può evidenziare \alert{parte del testo} in questo modo.
-%
-Si può inserire un comando matlab all'interno del testo
-in questo modo : \lstinline[language=Matlab]{for i = 1 : 10, disp (i), end}
-
-si può inserire un un file contenete un codice matlab in questo modo :
-\lstinputlisting[language=Matlab]{codice.m}
-
-Si possono inserire solo alcune righe del file in questo modo :
-\lstinputlisting[language=Matlab, firstline=1, lastline=2]{codice.m}
-
+\begin{frame}
+\frametitle{Matrix Free GMRES}\framesubtitle{Algoritmo per calcolare la distorsione nei circuiti analogici}
+%[CANCELLA](cerco stato stazionario periodico = le variabili di stato non dipendono dal tempo)[CANCELLA]
+\begin{itemize}
+\item I dati si ricavano simulando il circuito e misurando i valori ottenuti in un periodo T.
+\begin{equation}
+f(\mathbf{v}(t),t) = \mathbf{i}(\mathbf{v}(t)) + \mathbf{q}'(\mathbf{v}(t)) + \mathbf{u}(t) = 0	           
+\end{equation}
+\footnotetext{$\mathbf{v}$, $\mathbf{i}$, $\mathbf{q}$, $\mathbf{u} \in   \mathbb{R}^N$\\} 
+\begin{equation}
+\mathbf{v}(T) - \mathbf{v}(0) = 0 
+\end{equation}
+\item Dalla (1) e (2) si ricava  \begin{equation}
+\mathbf{\phi}(\mathbf{v}(0),0,T) - \mathbf{v(0)}
+ = 0
+ \end{equation}
+\item Dove \[ \phi = \int\limits_0^T f(\mathbf{v}(t),t) dt\]
+%[CANCELLA](funzione di stato)[CANCELLA] 
+\end{itemize}
 \end{frame}
 
 
+\begin{frame}
+\frametitle{Matrix Free GMRES}
+\framesubtitle{Iterazione di Newton (I)}
+\begin{itemize}
+\item Tramite il metodo di Newton alla (3) si ottiene l'iterazione\begin{equation}
+\mathbf{v}_0^j = \mathbf{v}_0^{j-1} - [J_{\phi}(\mathbf{v}_0^{j-1},0,T) - I]^{-1}[\phi(\mathbf{v}_0^{j-1},0,T) - \mathbf{v}_0^{j-1}]
+\end{equation}con $\mathbf{v}_0 = \mathbf{v}(t=0)$.       
+\item Utilizzando opportuni passaggi(vedi dac95 paragrafo 2) si ricava la formula
+\end{itemize} 
+ \begin{equation}
+\bigg[\frac{\mathbf{C}(\mathbf{v}_m^{l-1})}{h_m} + \mathbf{G}(\mathbf{v}_m^{l-1})\bigg](\mathbf{v}_m^l-\mathbf{v}_m^{l-1}) = - \frac{1}{h_m}(\mathbf{q}(\mathbf{v}_m^{l-1}) - \mathbf{q}(\mathbf{v}_{m-1})) - \mathbf{i}(\mathbf{v}_m^{l-1}) - \mathbf{u}_m
+\tag{8}
+\end{equation}
+\end{frame}
 
-\begin{frame} \frametitle{Come inserire una figura}
-Questo è un esempio di come inserire una figura
+
+\begin{frame}
+\frametitle{Matrix Free GMRES}
+\framesubtitle{Iterazione di Newton (II)}
+Siano\\
+\begin{itemize}
+\item m = instante temporale%[CANCELLA](suddivido T in M instanti)[CANCELLA]
+\item $h_m = t_m - t_{m-1}$
+\item $\mathbf{C} = \frac{d\mathbf{q}}{d\mathbf{v}}$
+\item $\mathbf{G} = \frac{d\mathbf{i}}{d\mathbf{v}}$ 
+\item $J_f = \frac{\mathbf{C}(\mathbf{v}_m^{l-1})}{h_m} + \mathbf{G}(\mathbf{v}_m^{l-1})$
+\end{itemize}
+ La sensibilità si esprime come
+ \begin{equation}
+J_f(\mathbf{v}_m)\frac{d\mathbf{v}_m}{d\mathbf{v}_0} = \frac{\mathbf{C}(\mathbf{v}_{m-1})}{h_m}\frac{d\mathbf{v}_{m-1}}{d\mathbf{v}_0}
+\tag{11}
+\end{equation}
+L'iterazione di Newton richiede circa $N^2$ flops.\footnote{N = dim($\mathbf{v}$)\\}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Matrix Free GMRES}\framesubtitle{\textbf{Algoritmo (I)}. Per risolvere Ax = b con GMRES}
+$\mathbf{x}_0 =$ Guess iniziale\\
+$p_0 = b - A\mathbf{x}_0$ (direzione)\\
+k = 1\\
+do \{\\
+$p^k = Ap^{k-1}$ (nuova direzione)\\
+$p^k = p^k -\sum\limits_{j=0}^{k-1}\beta_{k,j}p^j$ (ortogonalizza)\\
+cerca $\alpha_k$ in $x^k = x^{k -1} + \alpha_kp^k$ tale che\\
+$\|r^k\| = \|\mathbf{b} - A\mathbf{x}^k\|$ minimo\\
+$k = k + 1$\\
+\} while($\|r^k\| < tolerance_{GMRES}$)\\
+$\mathbf{x}^k = soluzione$
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Matrix Free GMRES}
+\begin{itemize}
+\item Il costo elevato dell'iterazione di Newton è causato dal calcolo di $ A = J_\phi - I$: $dim(A) = N^2$
+\item Il GMRES matrix free consente di risolvere il sistema senza memorizzare l'intera matrice A  
+%[CANCELLA(il computer memorizza A in forma sparsa,ovvero tiene in memoria solo i valori di A utili al calcolo della soluzione)CANCELLA]
+\item 
+Così facendo il calcolo di $J_\phi p^{k-1}$ richiede circa N operazioni\footnote{$J_\phi p^{k-1}$ serve a calcolare $Ap^{k-1}$ in ogni step k dell'iterazione \\}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Matrix Free GMRES}
+\begin{itemize}
+\item $Ap^{k-1} = (J_\phi - I)p^{k-1}$ è approssimabile a meno di un errore $\epsilon$ \\\begin{equation} \frac{\phi(\mathbf{v}_0 + \epsilon p^{k-1},0,T) - \phi (\mathbf{v}_0)}{\epsilon} - p^{k-1}
+\tag{12}
+\end{equation}
+%\item [CANCELLA](vedi frase dac 95 sotto la(12))[CANCELLA]
+\item L'algoritmo utilizzato per risolvere la (12) richiede lo stesso numero di operazioni necessario a calcolare una sola colonna di $J_\phi$ con il metodo di Newton
+\item Salvare $\mathbf{C}(\mathbf{v}_m)$ e fattorizzare LU $J_f(\mathbf{v}_m)$ ad ogni passo per applicare:
+\end{itemize}
+\begin{equation}
+J_f(\mathbf{v}_m)\frac{d\mathbf{v}_m}{d\mathbf{v}_0} = \frac{\mathbf{C}(\mathbf{v}_{m-1})}{h_m}\frac{d\mathbf{v}_{m-1}}{d\mathbf{v}_0}
+\tag{11}
+\end{equation}  
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Matrix Free GMRES}\framesubtitle{\textbf{Algoritmo (II)}. Per risolvere Ax = b matrix free}
+$\mathbf{v}_0 =$ Guess iniziale \\
+ For j = 1 to Max Newton \{ \\
+ $\int\limits_{0}^{T} (1) dt$ con $\mathbf{v}_0 = \mathbf{v}_0^{j-1}$ \\
+ For m = 1 to M \{ \\
+ Risolvi la (6) \\
+ Salva $J_f(\mathbf{v}_m)$ e $\mathbf{C}(\mathbf{v}_m)$ \\
+ \}\\
+ Risolvi $(J_\phi(\mathbf{v}^{j-1}) - I)\delta\mathbf{v}^j = \mathbf{v}^{j-1} - \phi(\mathbf{v}^{j-1})$ con GMRES\\
+ Nel GMRES calcola $p^{k+1} = J_\phi(\mathbf{v}^{j-1})p^k$ usando\\
+ $p^{k+1} = p^k$ \\
+ For m = 1 to M risolvi $J_f(\mathbf{v}_m)p^{k+1} = \mathbf{C}(\mathbf{v}_{m-1})p^{k+1}$ \\
+ $\mathbf{v}^j = \mathbf{v}^{j-1} + \delta\mathbf{v}^j$ \\
+ se $\|\delta\mathbf{v}^j\| < tolleranza_{Newton}$ return\\
+ \}
+\end{frame}
+
+
+\begin{frame} \frametitle{Matrix Free GMRES}
 \begin{figure}
     \centering
-    \includegraphics[width=.75\linewidth]{iv.pdf}
-    \caption{Questa è la didascalia}
-    \label{fig:my_label}
+    \includegraphics[width=.75\linewidth]{Tabella1.JPG}
+    \caption{Comparazione\footnotemark di metodi diversi per la risoluzione dei circuiti elettronici.}
+%    \label{fig:my_label}
 \end{figure}
-Se la figura ha un'etichetta la si può usare per fare riferimento
-alla figura nel testo : Figura~\ref{fig:my_label}
+%Se la figura ha un'etichetta la si può usare per fare riferimento
+%alla figura nel testo : Figura~\ref{fig:my_label}
+\footnotetext{Risultati ottenuti con HP712/80 workstation.}
 \end{frame}
 
-\begin{frame} \frametitle{Altra documentazione}
-Questo è un esempio di come inserire un link ad un URL
-\begin{itemize}
-    \item Altre informazioni utili
-    \begin{itemize}
-        \item Il sito del \href{https://www.latex-project.org}{\LaTeX{}--project}
-            \begin{itemize}
-                \item Una lista di 
-                \href{https://www.latex-project.org/get}{software offline ed online}\\
-                per creare documenti \LaTeX{}
-            \end{itemize}
-        \item Un \href{https://en.wikibooks.org/wiki/LaTeX}{Wikibook} su \LaTeX
-        \begin{itemize}
-            \item La sezione sulle \href{https://en.wikibooks.org/wiki/LaTeX/Presentations}
-            {presentazioni}
-            \item La sezione sulle
-            \href{https://en.wikibooks.org/wiki/LaTeX/Mathematics}{formule}
-        \end{itemize}
-        \item Un \href{https://tex.stackexchange.com/}{forum} con domande e risposte
-        \item La documentazione di \href{https://it.overleaf.com/learn}{overleaf}
-        \begin{itemize}
-            \item Un \href{https://it.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes}
-            {tutorial} per iniziare in 30 minuti
-        \end{itemize}
-        \item Uno strumento per \href{http://detexify.kirelabs.org/classify.html}
-        {cercare simboli}
-    \end{itemize}
-\end{itemize}
+
+\begin{frame} \frametitle{Matrix Free GMRES}
+\begin{figure}
+    \centering
+    \includegraphics[width=.75\linewidth]{Figura1.JPG}
+    \caption{Rapporto tra lo "shooting update time" e il costo di elaborazione del calcolo di una singola operazione.}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame} \frametitle{Matrix Free GMRES}
+\begin{figure}
+    \centering
+    \includegraphics[width=.75\linewidth]{Figura2.JPG}
+    \caption{Il grado di convergenza del metodo di Newton comparato al metodo Matrix Free.}
+\end{figure}
 \end{frame}
 \end{document}
