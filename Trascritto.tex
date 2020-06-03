@@ -12,187 +12,199 @@
 
 \section*{Stefano}
 \subsection*{Prima slide (metodi di Krylov)}
-Buongiorno, oggi spiegheremo i metodi di Krylov: sono metodi utilizzati per risolvere sistemi lineari (anche non simmetrici) in uno dei cosiddetti sottospazi di Krylov.
+Oggi spiegheremo i metodi di Krylov: sono metodi utilizzati per risolvere sistemi lineari in uno dei cosiddetti sottospazi di Krylov.
 
 \subsection*{Bibliografia}
 Questi sono i testi su cui abbiamo studiato.
 
 \subsection*{Sommario}
-Dopo un’introduzione parleremo di due metodi di Krylov: il metodo del gradiente coniugato, che tratteremo io e Lorenzo, e il metodo GMRES, che sarà trattato da Andrea e Nazariy. 
+Dopo un’introduzione parleremo di due metodi di Krylov: il metodo del gradiente coniugato, che tratteremo io e Lorenzo, e il metodo GMRES, che sarà trattato da Andrea. 
 
 \subsection*{Introduzione}
-I metodi di Krylov risolvono i sistemi lineari Ax=b; come sappiamo A è la matrice dei coefficienti, x è il vettore delle incognite e b il vettore dei termini noti. Questi che spiegheremo sono metodi iterativi, ovvero ad ogni passo viene calcolata la soluzione xk che appartiene al sottospazio di Krylov, che è definito da n colonne in questo modo. 
+I metodi di Krylov risolvono i sistemi lineari Ax=b; come sappiamo A è la matrice dei coefficienti, che ha dimensione n, x è il vettore delle incognite e b il vettore dei termini noti. Questi che spiegheremo sono metodi iterativi: ad ogni passo viene calcolata la soluzione xk appartenente al sottospazio di Krylov, che aumenta di dimensione ad ogni iterazione. E' definito data una matrice A e un vettore b da k colonne: b, Ab, A quadro b fino a A alla (k-1) b, con k>=1. Quando k sarà uguale a n il sottospazio di Krylov coinciderà con lo spazio Rn, e i vettori colonna che lo definiscono saranno una particolare base di Rn.
 
-\subsection*{Introduzione (II)}
-Un po’ di definizioni. Chiamiamo x0 il tentativo iniziale di soluzione, il primo vettore che daremo all’algoritmo. La soluzione del sistema la indichiamo con x*, il residuo al passo k sarà rk=b-ax al passo k, e l’errore la soluzione al passo k – la soluzione reale del sistema, che è legato al residuo in questo modo.
+Vediamo perchè il sottospazio di Krylov è stato definito in questo modo. Partendo dal metodo di Richardson non stazionario, abbiamo che il vettore residuo rk è uguale a b - A xk, e la soluzione al passo successivo xk+1 è uguale a xk + alfak rk. Sostituendo l'espressione di rk in quest'ultima formula e ponendo la soluzione alla prima iterazione x0 ad esempio = b, possiamo iterare il procedimento calcolando la soluzione x ad ogni passo k.
+In questo modo otteniamo che che al k-esimo passo la soluzione xk sarà combinazione lineare dei vettori di base del sottospazio kk.
+Quindi, basandosi su questa osservazione, possiamo ridurre il numero di iterazioni necessario per arrivare alla soluzione del sistema attraverso due possibili strategie: il metodo del gradiente coniugato e il metodo gmres.
+Inoltre, possiamo implementare questi metodi in versione matrix-free, ovvero ad ogni iterazione basta solo calcolare un prodotto matrice-vettore, e altre operazioni meno computazionalmente costose. Così possiamo allocare meno memoria: questo è vantaggioso quando ci sono problemi di grandi dimensioni. Invece, uno svantaggio dei metodi iterativi è che sono soggetti a errori di troncamento. Nella prossima slide
 
-\subsection*{Metodi di discesa}
-Avendo la matrice a, e ipotizzando che sia simmetrica e definita positiva, definiamo la funzione da Rn a R fi(x), che si chiama forma quadratica. Con le ipotesi che abbiamo imposto sulla matrice a questa funzione è convessa e ha un solo punto di minimo assoluto. La figura mostra un esempio di funzione fi(x).
+%\subsection*{Definizioni}
+%Diamo alcune definizioni. Chiamiamo x0 il tentativo iniziale di soluzione, cioè il primo vettore che daremo all’algoritmo. La soluzione esatta del sistema la indichiamo con x*, il residuo al passo k sarà il vettore rk=b-ax al passo k, e l’errore la soluzione al passo k – la soluzione esatta del sistema.
 
-\subsection*{Metodi di discesa (II)}
-Calcoliamo adesso il gradiente di fi(x), e otteniamo che è uguale a ax-b utilizzando le formule a fianco. Sostituendo x* nell’espressione del gradiente otteniamo ax*-b, che è =0 perché è la soluzione esatta del sistema. Il problema di trovare il minimo della funzione fi(x) è quindi equivalente a risolvere il sistema Ax=b.
-Partendo da un punto iniziale x0, dobbiamo scendere per passi lungo la superficie fi(x) per raggiungere il punto di minimo: ad ogni iterazione quindi definiamo una direzione di discesa dk, ovvero un vettore che indica la direzione lungo cui scendiamo, definiamo un passo alfak, cioè quanto è lungo il passo di discesa, e troviamo la soluzione al passo successivo seguendo la formula al passo 3.
-Adesso spiegheremo il metodo del gradiente e poi più in dettaglio il metodo del gradiente coniugato. Questi due metodi differiscono nella scelta dei metodi di discesa ma hanno in comune la scelta del passo alfak.
+\subsection*{Metodo di discesa}
+Riformuliamo il problema di ricerca della soluzione del sistema come ricerca di un punto di minimo. Avendo la matrice A, e ipotizzando che sia simmetrica e definita positiva, definiamo la funzione da Rn a R fi(x), che si chiama forma quadratica, come fi(x)= 1/2 x trasposto * A * x - x trasposto * b. Con le ipotesi che abbiamo imposto sulla matrice A questa funzione è convessa, e ha un solo punto di minimo assoluto. La figura mostra un esempio di funzione fi(x).
 
-\subsection*{Metodo del gradiente}
-Scegliamo come direzione di discesa il vettore residuo, come lo avevamo definito all’inizio. Siccome il gradiente di fi(x) è = ax-b, la direzione dk sarà uguale a – il gradiente di fi(x), ovvero la direzione di massima discesa. Il passo di discesa alfak lo scegliamo cosi, e dimostreremo più avanti la formula.
-Si aggiorna quindi la soluzione, come avevamo visto, e lo stesso per il vettore residuo.
-In figura vediamo le curve di livello di fi(x), e possiamo capire come ha operato il metodo del gradiente coniugato: ad ogni iterazione la direzione di discesa è la direzione del gradiente con verso opposto, e alla fine dopo alcune iterazioni è arrivato alla soluzione.
+\subsection*{Metodo di discesa (II)}
+Calcoliamo adesso il gradiente di fi(x), e otteniamo che è uguale a ax-b. Sostituendo x* nell’espressione del gradiente otteniamo ax*-b, che è =0 perché x* è la soluzione esatta del sistema. Il problema di trovare il minimo della funzione fi(x) è quindi equivalente a risolvere il sistema Ax=b.
+Partendo da un punto iniziale x0, dobbiamo scendere per passi lungo la superficie fi(x) per raggiungere il punto di minimo: ad ogni iterazione quindi definiamo una direzione di discesa dk, ovvero un vettore che indica la direzione lungo cui scendiamo; definiamo un passo alfak, cioè quanto è lungo il passo di discesa, e troviamo la soluzione al passo successivo come xk + alfak per dk.
+Il metodo del gradiente coniugato è analogo nell'approccio al metodo del gradiente, ma differisce nella scelta delle direzioni di discesa: si sfrutta la conoscenza delle precedenti, e vengono esplorate le possibili nuove direzioni tramite proiezioni sui sottospazi di Krylov.
 
-\subsection*{Metodo del gradiente coniugato – passo di discesa}
-Dobbiamo scegliere il passo di discesa, ovvero di quanto scendiamo lungo la direzione dk. L’alfak migliore è quello che minimizza fi valutata in xk+1: si ottiene sostituendo l’espressione di xk+1 nella forma quadratica fi, poi derivando e imponendo la condizione di punto stazionario.
-
-\subsection*{Calcolo del residuo}
-Bisogna calcolare il residuo al passo successivo, per poi utilizzarlo nel calcolo della direzione di discesa, secondo questa formula ricavata mediante la definizione di errore. Per matrici particolarmente grandi, ci potrebbero essere errori di troncamento, quindi sarebbe meglio sostituire quest’istruzione con quella citata ogni tanto nell’implementazione.
+\subsection*{Confronto Gradiente Coniugato - Gradiente}
+In figura sono rappresentate le curve di livello di fi(x), e le iterazioni necessarie al metodo del gradiente (in verde) e del gradiente coniugato (in rosso) per arrivare a convergenza.
+Si nota che il metodo del Gradiente Coniugato esegue molte meno iterazioni rispetto al metodo del Gradiente proprio per questo motivo. 
 Ora passo la parola a Lorenzo che continuerà con la scelta della direzione di discesa.
+
+%\subsection*{Metodo del gradiente coniugato – passo di discesa}
+%Innanzitutto dobbiamo scegliere il passo di discesa, ovvero di quanto scendiamo lungo la direzione dk. L’alfak migliore è quello che minimizza fi valutata in xk+1, ed è definito come il vettore direzione al passo k trasposto per il vettore residuo rk diviso dk trasposto per A per dk.
+%Si ricava questo particolare alfak sostituendo l’espressione di xk+1 nella forma quadratica fi, poi derivando e imponendo la condizione di punto stazionario e ricavando alfak.
+
+%\subsection*{Calcolo del residuo}
+%Bisogna calcolare il residuo al passo successivo, per poi utilizzarlo nel calcolo della direzione di discesa. Il vettore residuo al passo k+1 è = al residuo al passo k - alfak per A per il vettore direzione al passo k. La dimostrazione di questa formula si esegue partendo dalla definizione di errore e ricavando rk+1. Per matrici particolarmente grandi, ci potrebbero essere errori di troncamento, quindi sarebbe meglio sostituire ogni tanto nell'algoritmo quest’istruzione con rk = b-A xk.
 
 
 \section*{Lorenzo}
-\subsection*{Calcolo del residuo}
-Come già visto, il residuo si può ricavare dall’applicazione della matrice A all’errore. Dato che l’errore può essere valutato mediante il passo di discesa nel seguente modo, sostituendo e risolvendo l’equazione, otteniamo che il residuo può essere calcolato utilizzando il residuo e la direzione precedente.
-Questa formula non è un’approssimazione, però è soggetta ad errori di troncamento a causa della macchina; soprattutto se la matrice ha  una dimensione elevata. Questo errore di troncamento può essere rimosso applicando, ogni tot iterazioni, la formula originale (che utilizza il vettore dei termini noti, e il vettore della soluzione approssimata a quel passo).
 
 \subsection*{Direzione di discesa}
-Abbiamo già visto precedentemente il sottospazio di Krylov K, creato applicando ripetutamente una matrice a un vettore.
-Questo sottospazio ha una proprietà importante: infatti se sappiamo che A K è incluso nel sottospazio K del passo successivo e che il residuo del passo successivo è ortogonale  al sottospazio K del passo successivo, allora il residuo del passo successivo è A-ortogonale ad A K.
-Di conseguenza il residuo del passo successivo è anche A-ortogonale alle precedenti direzioni di discesa d.
-Quindi l’algoritmo di Gram-Schimdt si semplifica e la formula per calcolare la nuova direzione di discesa diviene quella qui mostrata.
-È importante notare che non sarà più necessario memorizzare le vecchie direzioni di ricerca.
+Entriamo nel dettaglio del gradiente coniugato, calcolando la direzione di discesa.
+Questa, viene scelta in modo che sia A-ortogonale (ovvero coniugata) alle direzioni precedenti. In questo modo possiamo risolvere il problema in un numero di iterazioni, pari al massimo alla dimensione di A.
+Per ottenere direzioni A-ortogonali, utilizziamo l’ortogonalizzazione di Gram-Schmidt.
+La nuova direzione sarà una combinazione lineare delle precedenti e del residuo.
+Calcolarla così è molto dispendioso per la memoria, perché dobbiamo salvarci tutte le nuove direzioni.
+Però, i sottostpazi di Krylov hanno una proprietà importante: infatti, se il residuo del passo successivo è ortogonale al sottospazio K del passo successivo, allora il residuo del passo successivo è A-ortogonale a K.
+Di conseguenza, il residuo del passo successivo è anche A-ortogonale alle precedenti direzioni di discesa d.
+Quindi l’algoritmo di Gram-Schimdt si semplifica e non sarà più necessario memorizzare le vecchie direzioni di ricerca.
+La nuova direzione sarà combinazione lineare del residuo e della sola direzione precedente.
 È proprio questo il punto di forza del complesso coniugato: non dovendo memorizzare le vecchie direzioni, la complessità dello spazio e del tempo si riduce.
-Precisamente si riduce da O-grande della dimensione al cubo della matrice, a O-grande lineare degli elementi non nulli della matrice, quindi lineare
-È anche interessante notare, che non sono i gradienti a essere coniugati, e che le direzioni non rappresentano la totalità dei gradienti; perciò sarebbe stato più corretto chiamare questo metodo più che del gradiente coniugato delle direzioni coniugate.
+Il risvolto della medaglia è che se in un passo c’è un errore di approssimazione, questo si propaga nelle ortogonalizzazioni successive. Per ovviare a questo si utilizza lo Start And Stop, ovvero il far ripartire l’algoritmo da zero partendo dalla soluzione approssimata che siamo riusciti a calcolare.
 
 \subsection*{Passo di discesa (I)}
-Alla luce di queste considerazioni possiamo vedere (anche attraverso la figura due) che a ogni passo il residuo e la direzione puntano allo stesso sottospazio.
-Questo sottospazio è parallelo a quello di Krylov da cui sono partiti. Nella figura il sottospazio è piano, perché siamo alla seconda iterazione.
-Di conseguenza questi due prodotti scalari si eguagliano, e possiamo riscrivere il numeratore della formula per il calcolo del passo di discesa.
-Questa sostituzione, ci permette di migliorare le prestazioni dell’algoritmo.
+Ora che conosciamo in che direzione bisogna muoversi, calcoliamo il passo ottimale da fare. Dato che esploriamo una dimensione alla volta, dobbiamo calcolare il punto per cui in quella direzione la forma quadratica si minimizza.
+Per calcolarla sostituiamo nella forma quadratica la formula del passo successivo.
+Poi deriviamo, e imponiamo la condizione di stazionarietà.
+Da questa formula ricaviamo il nostro passo di discesa.
 
 \subsection*{Passo di discesa (II)}
+A ogni passo il residuo e la direzione puntano allo stesso sottospazio, come R2 e D2 in figura.
+Questo sottospazio è parallelo a quello di Krylov da cui sono partiti. Nella figura il sottospazio è piano, perché siamo alla seconda iterazione.
+Di conseguenza, il prodotto scalare tra direzione e residuo è uguale a quello del residuo per se stesso.
+Possiamo riscrivere allora il numeratore della formula per il calcolo del passo di discesa.
 
-È complicato effettuare accurate previsioni della convergenza dei metodi iterativi; comunque è possibile ottenere dei limiti utili. Possiamo infatti ottenere la seguente formula dove K di A è il numero di condizionamento della matrice.
-Il numero di condizionamento è il rapporto tra il più grande  e il più piccolo degli autovalori della matrice. Questo rappresenta il rapporto tra errore commesso sul risultato di un calcolo e incertezza sui dati in ingresso.
-Utilizzando i metodi iterativi raramente ci si trova nella situazione di dover ricercare la soluzione esatta, e molte volte ci si arresta fissando una tolleranza rispetto al residuo.
-Per la nostra implementazione lavoreremo fissando una tolleranza sul residuo quadrato in modo da evitare il calcolo di una radice quadrata.
+\subsection*{Velocità di convergenza}
+È complicato effettuare accurate previsioni della convergenza dei metodi iterativi; comunque, è possibile ottenere dei limiti utili per l’errore, che dipendono dal numero di condizionamento K in norma euclidea.
+Utilizzando i metodi iterativi, raramente ci si trova nella situazione di dover ricercare la soluzione esatta, e molte volte ci si arresta fissando una tolleranza rispetto al residuo del passo zero.
+
+\subsection*{Residuo}
+Ora è necessario trovare una formula più prestante per il calcolo del residuo .
+Sappiamo che il residuo è pari alla matrice per l’errore della soluzione approssimata.
+Non conosciamo l’errore, ma sappiamo che questo, come la soluzione approssimata, è ottenibile dalla combinazione lineare dell’errore e dalla direzione al passo precedente.
+Quindi rimoltiplicando per A troviamo la formula cercata.
+
+\subsection*{Metodo del gradiente coniugato}
+Abbiamo ora tutte le conoscenze che ci permettono di definire il nostro algoritmo.
+Al passo zero calcoliamo il residuo e lo fissiamo come direzione di partenza.
+Entriamo quindi nel ciclo fino alla convergenza:
+Calcoliamo l’alpha attraverso il residuo e la direzione.
+La soluzione approssimata del passo, la calcoliamo come combinazione lineare della soluzione precedente e della direzione;
+Il residuo come combinazione del residuo precedente e di A per la direzione;
+A questo punto calcoliamo beta come rapporto delle norme quadrate dei residui del passo in cui siamo e di quello precedente.
+Infine la direzione del passo successivo  è la combinazione del residuo e della direzione precedente.
+A questo punto traduciamo il linguaggio matematico in codice Matlab.
+
+\subsection*{Implementazione Matlab}
+Abbiamo come input la matrice A, il vettore dei termini noti b, una guess iniziale x, un numero massimo di iterazioni kmax e una tolleranza E.
+Quindi inizializziamo la variabile delle iterazioni a zero;
+Calcoliamo il residuo iniziale, e lo assegnamo alla direzione iniziale ;
+Delta è la variabile che memorizza la norma del residuo;
+Delta zero, invece, memorizza il residuo al passo zero per poterlo confrontare a ogni passo;
+Infatti, come condizioni per il ciclo ritroviamo il numero massimo di iterazioni, e appunto la tolleranza rispetto alla norma quadrata;
+Entriamo nel ciclo e assegnamo il prodotto matrice A e direzione a una variabile di convenienza q.
+Quindi calcoliamo l’alpha, la soluzione e il residuo seguendo l’algoritmo del gradiente coniugato.
+Quindi, dopo aver memorizzato il vecchio residuo in deltaold lo ricalcoliamo.
+In questo modo, possiamo calcolarci beta e la direzione per il passo successivo.
 
 \subsection*{Precondizionamento (I)}
-Il precondizionamento è un metodo per migliorare appunto il numero di condizionamento di una matrice: il nostro obbiettivo è quindi quello di raggruppare gli autovalori, ovvero minimizzare la variazione tra l’autovalore maggiore e quello minore.
-Intuitivamente lo scopo del precondizionamento è quello di rendere la forma quadratica più sferica.
-Per applicare il metodo dobbiamo calcolare il sistema originale A x uguale b mediante la prima equazione che vedete.
-Il problema di questa equazione è che M alla meno uno in generale non è simmetrica o definita, ma possiamo comunque trovare una matrice P tale che P per la sua trasposta sia uguale a una matrice M simmetrica e definita positiva.
-Il sistema equivalente che ne deriva è questo in fondo, e avremo che l’inversa di P per la matrice A per la traslazione dell’inversa P è simmetrica e definita positiva.
+Possiamo però spingere ancora più in la le prestazioni del nostro algoritmo attraverso il precondizionamento.
+Il precondizionamento è un metodo per migliorare  il numero di condizionamento di una matrice: il nostro obbiettivo è quindi quello di  minimizzare la variazione tra l’autovalore maggiore e quello minore.
+Intuitivamente lo scopo del precondizionamento è quello di rendere la forma quadratica più sferica: infatti più è sferica, più l’inverso del suo gradiente punta verso il minimo.
+Per fare questo cerchiamo una matrice M, facilmente invertibile, tale che applicando la sua inversa alla matrice A si riduca il suo numero di condizionamento.
+Per applicare il metodo dobbiamo calcolare il sistema originale A x uguale b mediante il sistema precondizionato, ottenuto moltiplicando l’inversa di M a entrambi i membri.
+Il problema di questa equazione è che M alla meno uno in generale non è simmetrica o definita, nonostante lo siano M ed A.
+Possiamo comunque trovare una matrice P tale che P per la sua trasposta sia uguale a una matrice M simmetrica e definita positiva.
+Si può dimostrare che l’inversa di M per A ha gli stessi autovalori dell’inversa di P per A per la trasposta inversa di P.
+L’inversa di P per la matrice A per la traslazione dell’inversa P è simmetrica e definita positiva. Possiamo quindi risolvere il sistema precondizionato col metodo del gradiente coniugato calcolandoci l’inversa della matrice M come il prodotto della matrice trasposta inversa P per l’inversa di P.
 
 \subsection*{Precondizionamento (II)}
-Nella scelta di M stiamo quindi realizzando un compromesso tra la diminuzione del numero di condizionamento, e il calcolo del residuo precondizionato.
-Questo trade-off è conveniente al crescere della dimensione di A, quindi conviene spesso calcolare la matrice M; ad esempio attraverso Jacobi, ovvero il precondizionamento diagonale, in cui M presenta sulla diagonale gli stessi elementi della diagonale di A; e il suo effetto è scalare la matrice lungo gli assi delle coordinate.
-Più avanzato  è il precondizionamento incompleto di Cholesky. Questo sfrutta la fattorizzazione di Cholesky per fattorizzare A nella forma L per L traslata dove la matrice L è una matrice triangolare bassa. 
-Della matrice L per il precondizionamento vengono tenuti solo gli elementi che si trovano nelle stesse posizioni degli elementi non  nulli della matrice A.
-Sfortunatamente il metodo di Cholesky non è sempre stabile.
-
-\subsection*{Metodo del gradiente coniugato (senza precondizionamento)}
-In questa slide raggruppiamo tutte le formule necessarie per il nostro metodo iterativo.
-Con questa visione d’insieme è perciò semplice tradurre il linguaggio matematico in codice Matlab.
-
-\subsection*{Implementazione Matlab (senza precondizionamento)}
-Notiamo che abbiamo fissato come condizioni per il ciclo un numero massimo di iterazioni e una tolleranza rispetto alla norma quadrata del residuo.
-
-\subsection*{Metodo del gradiente coniugato (con precondizionamento)}
-Analogamente in questa slide abbiamo raggruppato tutte le formule necessarie per il Metodo del gradiente coniugato con precondizionamento.
-Di conseguenza il nostro codice Matlab, è di nuovo facilmente ottenibile.
-
-\subsection*{Implementazione Matlab (con precondizionamento)}
-Come  detto prima notiamo che a ogni iterazione viene calcolato il residuo precondizionato s.
-
-\subsection*{Considerazioni finali su gradiente e gradiente coniugato}
-A fronte di possibili errori di troncamento, comunque evitabili da ciò che abbiamo visto, abbiamo vantaggi importanti.
-In definitiva, quello che possiamo concludere, è che attraverso questi metodi (ovvero del gradiente e del gradiente coniugato) possiamo evitare il calcolo dell’inverso della matrice, molto costoso computazionalmente.
-Inoltre, diversamente dai metodi che prevedono fattorizzazione; nei casi di matrice sparse manteniamo il vantaggio di allocazione di memoria che queste ci forniscono.
-Questi vantaggi ci permettono di allocare meno memoria: sono convenienti specialmente in problemi di grandi dimensioni, e sono utili in ottica di parallelismo su più CPU.
-
-\subsection*{Confronto Gradiente - Gradiente Coniugato}
-Confrontando il metodo del gradiente e il metodo del gradiente coniugato possiamo vedere come nel 99\% dei casi converga prima il gradiente coniugato.
-Dico 99\%, perché in pochi casi fortunati il gradiente converge alla prima iterazione.
-Ad esempio può succedere che se la matrice A ha uguali autovalori e otteniamo la soluzione alla prima iterazione. Si può capire intuitivamente perché se la matrice A ha uguali autovalori le linee di livello della forma quadratica sono circolari; e il punto di minimo si trova sulla direzione del gradiente.
-Oppure, se il termine di errore in qualche passo ha la direzione di un autovettore, la soluzione converge al passo successivo.
+Nella scelta di M stiamo realizzando un compromesso tra la diminuzione del numero di condizionamento, e il calcolo del residuo precondizionato.
+Questo trade-off è conveniente al crescere della dimensione di A, quindi conviene spesso calcolare la matrice M;
+ad esempio attraverso Jacobi.
 
 
 \section*{Andrea}
 \subsection*{Introduzione}
 
-\textbf{[Slide -> Generalized Minimal RESidual]}
-Tra i metodi di Krylov vi è il GMRES, ovvero residuo minimo generalizzato. 
+\subsection*{[Slide -> Generalized Minimal RESidual]}
+Un altro metodo di Krylov è il GMRES, ovvero residuo minimo generalizzato. 
 
-\textbf{[Slide -> GMRES]}
-Utilizzando il sottospazio Kn si calcola una soluzione approssimata del sistema lineare Ax = b tramite iterazione.
-Per calcolare la soluzione esatta del problema sarebbe necessario calcolare $A^-1$ il che risulta eccessivamente dispendioso dal punto di vista computazionale, si procede quindi a calcolare una soluzione approssimata $x_n$ che disterà di un valore b – Axn dalla soluzione esatta; tale valore viene definito residuo. Il GMRES si pone il problema di minimizzare il residuo ottenuto il modo da ottenere la xn che meglio approssima la soluzione del sistema
+\subsection*{[Slide -> GMRES]}
+In quanto metodo krylov il GMRES si occupa di approssimare la soluzione del sistema Ax = b a $x_k$.
+Il GMRES si pone il problema di minimizzare il residuo di $x_k$ in modo da approssimare al meglio la soluzione del sistema
 
-Se moltiplico Kn per A il residuo equivale a AKnc-b con c un generico vettore appartenente a $C^n$ e c sarà la nostra incognita.
-Il valore di c per cui il residuo è minimo è facilmente calcolabile via fattorizzazione QR, però il prodotto AKn diventa numericamente instabile al crescere di n. Per questo motivo occore trovare un nuovo metodo più robusto.
-Ci viene in aiuto l’iterazione di Arnoldi .
-
-\textbf{[Slide -> iterazione di Arnoldi(I)]}
-Arnoldi consente di semplificare il problema passando da uno di dimensioni m x n a uno di dimensioni (n+1) x n, infatti: definendo come Qn la matrice i cui vettori formano una base ortonormale di Kn
-Allora xn può essere scritto come Qn * y e il residuo sarà A Qn y – b
-
-Tramite arnoldi si dimostra che AQn = Qn+1Hn
-E otterrò questo la formula a fondo slide
-
-\textbf{[Slide -> iterazione di Arnoldi(II)]}
-Successivamente moltiplico entrambi i membri per Qn+1 trasposto, complesso coniugato e noto che Qn+1*b = |b| e1 giungendo in conclusione a Hny - |b|e1. 
-Tramite l’approssimazione ai minimi quadrati posso calcolare la y tale per cui la norma del residuo è minima trovando quindi il vettore che meglio approssima la soluzione del sistema lineare Ax = b
-
-\textbf{[Slide -> Generalized Minimal RESidual]}
-Il GMRES viene utilizzato anche nel calcolo polinomiale
-
-\textbf{[Slide -> GMRES polinomi]}
-Se il polinomio rispetta l’ipotesi pn(0) = 1 (quindi devo semplicemente normalizzare il polinomio rispetto al termine 0) sono in grado di definire una soluzione approssimata xn = qn(A)b avente residuo rn = pn(A)b e dovrò nuovamente minimizzare la norma del residuo. 
-
-\textbf{[Slide -> velocità di convergenza]}
-Calcoliamo la velocità di convergenza del GMRES
-Innanzitutto vi voglio far notare che la norma di rn qui indicata è quella ottenuta dopo aver risolto il GMRES ed è quindi la più piccola possibile
-Procediamo facendo 2 osservazioni:
-primo la convergenza è monotona decrescente, quindi al crescere di n ho la garanzia di aver reso più precisa l’approssimazione o nel caso pessimo è rimasta invariata. Infatti la norma di rn è la più piccola possibile nel sottospazio Kn; allora passando al sottospazio a Kn+1 è garantito che rn+1 ha norma <= alla norma di rn
-secondo ho la garanzia che per n sufficientemente elevato soddisferò il grado di tolleranza. Questa osservazione è spiegata dal fatto che per n -> infinito posso affermare che la soluzione esatta $x = A^-1 b$ appartiene ad uno dei sottospazi di Krylov considerati quindi avrò un Kn segnato dove la norma minima del residuo è nulla.
-
-La norma del residuo è = alla norma di pn(A)b, ma la norma del prodotto è <= al prodotto delle norme, in conclusione solo pn(A) influenza la velocità di convergneza.
+$X_k$ appartiene a $K_k$, allora potrò scriverlo come combinazione lineare dei vettori del sottospazio di krylov quindi ottengo $x_k$ = c $K_k$ con c un vettore reale di dimensione k. il residuo sarà A $K_k$ c-b.
+Il valore di c per cui il residuo è minimo è facilmente calcolabile via fattorizzazione QR.
+Si nota subito il difetto di questo metodo: la fattorizzazione QR presenta sempre un errore di troncamento che diventa significativo per k elevati e si genera inutilmente la matrice R. Cerchiamo allora un metodo più robusto per risolvere il sistema.
+Ci viene in aiuto l’iterazione di Arnoldi.
 
 
-\section*{Nazariy}
-\subsection*{Introduzione}
-\subsection*{$1^o$frame. Analisi stazionaria efficiente basata sul metodo matrix-free nei sottospazi di Krylov}
-Vedremo ora un esempio dell’applicazione del metodo GMRES e di un suo caso particolare.
-\subsection*{$2^o$frame. Intro}
-L’interesse crescente nei circuiti integrati nei sistemi di comunicazione ha rinnovato anche l’interesse nei vari metodi utilizzati per la loro risoluzione, in particolare per il calcolo della distorsione presente in grandi circuiti analogici. La ricerca di un metodo veloce, ma al tempo stesso accurato, diventa essenziale per una valutazione più rapida del comportamento del circuito. 
-Infatti, se volessimo caratterizzare un circuito concreto con la sua distorsione, sarebbero da valutare sia frequenze, sia ampiezze del segnale applicato, quindi bisognerebbe spazzare almeno centinaia di valori per cercare il comportamento del circuito ad ogni frequenza e per ogni ampiezza.
-Per raccogliere i dati bisognerebbe simulare il circuito per un certo periodo di tempo, ma in certi casi non è possibile lasciar scorrere abbastanza tempo da ottenere condizioni di stabilità per ogni valore in ingresso, quindi serve un algoritmo rapido ed accurato per caratterizzare un circuito.
-Quando si vuole risolvere un tale circuito in condizioni stazionarie, solitamente si fa l’uso del metodo di eliminazione di Gauss, o dei metodi iterativi. Se consideriamo N come il numero di equazioni del circuito, la complessità di calcolo richiesta dal metodo di Gauss è dell’ordine $N^3$, mentre il metodo iterativo richiede $N^2$ di complessità del calcolo. Con questo esempio, mostriamo un caso particolare di GMRES, la cui complessità di calcolo sta nell’ordine di N ed evita la memorizzazione di molte matrici, risparmiando così anche lo spazio sul calcolatore. 
-Giusto per dare qualche numero, se si ha un circuito analogico con almeno 400 equazioni, il metodo matrix-free consente di calcolare le soluzioni 10 volte più velocemente dei metodi iterativi.
-\subsection*{$3^o$frame. Algoritmo per calcolare la distorsione nei circuiti analogici}
-Se volessimo risolvere un circuito con tante equazioni, cercheremmo degli stati stazionari periodici con le seguenti formule.
-Infatti, vediamo che i dati si ricavano simulando il circuito e misurando i valori ottenuti in un periodo T. Qui abbiamo vettori di ingressi, di tensioni e correnti ai nodi. Una soluzione dell’equazione (1), che soddisfa anche la (2) è una soluzione periodica stazionaria.
-Generalmente, nei metodi di “shooting” la (1) e la (2) si riformulano come la (3), in cui $\phi$ è la funzione di stato dell’equazione (1).
-\subsection*{$4^o$frame. Iterazione di Newton (I)}
-Di sicuro, non è lo scopo di questa presentazione spiegarvi le iterazioni di Newton, quindi vi mostriamo giusto le formule principali con le quali si fa questo calcolo. Applicando il metodo di Newton alla (3) si ricava l’equazione (4).
-Ogni iterazione di Newton richiede la soluzione di un grande sistema lineare, dato dall’equazione 4, che appunto, se fatto con il metodo di Gauss, richiederebbe un costo crescente con il cubo del numero di incognite. Quindi questo metodo risulterebbe intrattabile con un grandissimo numero di equazioni da risolvere.
-Con degli opportuni passaggi, descritti appunto più dettagliatamente nel file dac95, allegato nella chat, al paragrafo 2, si arriva alla formula generale risolutiva, data dall’equazione (8).
-\subsection*{$5^o$frame. Iterazione di Newton (II)}
-La matrice di sensibilità può essere calcolata con la seguente formula, sempre dimostrata nel file pdf. A differenza del metodo di Gauss, il metodo di iterazioni di Newton richiede circa $N^2$ flops di calcolo.
-\subsection*{$6^o$frame. Algoritmo (I)}
-Vediamo un modo per risolvere il problema con il metodo GMRES. In particolare, vediamo un suo algoritmo semplificato e di facile lettura. 
-Qui abbiamo una guess iniziale e la direzione in cui si procede nella ricerca della soluzione finale. Si fa un ciclo iterativo, che ad ogni passo calcola la nuova direzione, la ortogonalizza e cerca $\alpha_k$ tale da minimizzare il residuo. Questo procede avanti fintanto che non soddisfa la tolleranza desiderata.
-\subsection*{$7^o$frame. Costo operazioni}
-Il costo dominante di questo approccio consiste nel calcolo di N2 componenti di A, tramite l’equazione (11) della slide precedente, ancora prima di cominciare l’iterazione, e di altre N2 operazioni per calcolare $Ap^{k-1}$ ad ogni iterazione.
-Vediamo come eseguire questo calcolo con il metodo matrix-free. Essendo un caso particolare di GMRES non richiede un’esplicita rappresentazione di A, ma soltanto il calcolo di $Ap^{k-1}$. Quindi non c’è bisogno di memorizzare la matrice A. (calcolo di $Ap^{k-1}$ non è N quadro?)
-\subsection*{$8^o$frame. Formula 12}
-Perturbando v(0) in direzione di $p^k$, e integrandolo in un periodo per calcolare $\phi(v_0+\epsilon p^{k-1},0,T)$, si può ricavare $Ap^{k-1}$ tramite l’equazione 12. Anche se la 12 può essere usata direttamente come l’approccio matrix-free per formare i prodotti matrice-vettore richiesti da GMRES per risolvere il problema, sarebbe molto più efficiente, nel senso del costo di computazione e molto più robusto numericamente, salvare $C(v_m)$, eseguire la fattorizzazione LU di $J_f(v_m)$ ad ogni passo e usare la 11 per calcolare $J_{\phi} p^{k-1}$. 
-\subsection*{$9^o$frame. Algoritmo (II)}
-Questo procedimento è rappresentato nell’algoritmo II.
-\subsection*{$10^o$frame. Figura 1}
-Vediamo alcuni esempi per capire i vantaggi di questo algoritmo. In figura 1 vengono presentati diversi tipi di circuiti che impiegano diversi componenti, come per esempio xtal che è un filtro a quarzo. Nella seconda colonna viene mostrato il numero di equazioni di ogni circuito. Nella terza colonna viene mostrato il numero di periodi transitori (o iterazioni, non ho ben capito) necessari per raggiungere le condizioni stazionarie. La quarta, quinta e sesta colonna mostra il tempo in secondi, impiegato per eseguire il calcolo delle condizioni stazionarie con il metodo di Gauss, GMRES e algoritmo Matrix-Free. La settima colonna dimostra l’efficacia dell’approccio matrix-free rispetto al metodo di Gauss.
-\subsection*{$11^o$frame. Figura 2}
-In figura 2 si compara il tempo di ogni iterazione con il costo di calcolo. Il metodo matrix-free dimostra un rapporto pressoché costante, cioè anche all’aumentare del numero delle equazioni, il tempo impiegato per un periodo transitorio (o iterazione, non ho ben capito) rimane invariato.
-\subsection*{$12^o$frame. Figura 3}
-In figura 3 viene mostrato il grado di convergenza dei risultati dei due metodi per un circuito abbastanza grande. È evidente che l’accuratezza del calcolo rimane sostanzialmente invariata.
-Questo approccio può essere applicato anche ad altri problemi. Per esempio, nei circuiti si possono calcolare nello stesso modo anche problemi di bilanciamento armonico e altri problemi che impiegano sia frequenze, sia tempo. 
+\subsection*{[Slide -> iterazione di Arnoldi(I)]}
+Tramite Gramm-Schmidt facciamo la fattorizzazione QR delle prime k colonne di A generando così $Q_k$
+I vettori di $Q_k$ generano una base ortonormale di $K_k$
+Allora posso scrivere $x_k$ come $Q_k$ y dove y appartiene a $R^k$
+Sostituendo nella formula del residuo avrò che la norma del residuo è uguale alla norma di A $Q_k$ y – b
+Per proseguire nell’iterazione di Arnoldi dobbiamo considerare la matrice di Hessemberg $H_n$.
+$H_n$ è una matrice quadrata quasi triangolare superiore aventi dimensioni n x n. 
+Una matrice è definita quasi triangolare superiore quando tutti i valori sotto la prima sottodiagonale sono pari a 0.
+Consideriamo la sezione superiore sinistra di $H_n$ che chiamo $H_k$ ottenuta considerando le prime k+1 righe e k colonne di $H_n$. $H_k$ avrà dimensioni k+1 x k.
+
+
+\subsection*{[Slide -> iterazione di Arnoldi(II)]}
+Per comprendere meglio come si ricavano $Q_k$ e $H_k$ scriviamo l’algoritmo che le genera:
+la prima colonna di q è = a b/norm(b)
+procedo ora con l’terazione per k da 1 a $num_iter$
+memorizzo in v il prodotto A per la k esima colonna di q
+poi for j = 1:k genero le righe della k esima colonna di h: $h(j,k)=q_k’ a q_k$
+calcolo h(k+1,k) = norm(v) e la k+1 esima colonna di q come v/h(k+1,k).
+Soffermiamoci sull’ultima formula
+
+\subsection*{[Slide -> iterazione di Arnoldi(III)]}
+
+Sostituiamo v con il suo valore: A $q_k$ e otteniamo che la k+1 esima colonna di q può essere calcolata come$ q_k+1 = A q_k / h_k$
+Moltiplicando entrambi i termini per $h_k$ A $q_k$ = $q_k+1 h_k $
+Questa formula vale anche in forma matriciale
+La norma da minimizzare sarà norma di$ Q_k+1 H_k y - b$
+
+
+\subsection*{[Slide -> iterazione di Arnoldi(IV)]}
+
+Successivamente moltiplico entrambi i membri per Qk+1 trasposto e noto che Qk+1*b = |b| e1 giungendo in conclusione il problema sarà di $H_k y - |b|e1 = minimo$. 
+Tramite l’approssimazione ai minimi quadrati posso calcolare la y tale per cui la norma del residuo è minima trovando quindi il vettore che meglio approssima la soluzione del sistema lineare Ax = b.
+L’utilizzo dell’ iterazione di arnoldi è molto vantaggioso infatti:
+Con la fattorizzazione QR il problema:
+1)ha dimensioni m x m
+2) non è ridotto ai minimi quadrati
+3)gli errori di troncamento della fattorizzazione QR posso essere non trascurabili
+4)la matrice R è generata inutilmente
+Con Arnoldi il problema:
+1)ha dimensione (k + 1) x k con k < m
+2)è ridotto ai minimi quadrati
+3)limitando il numero di colonne di A su cui faccio la fattorizzazione QR riduco gli errori di troncamento
+4)generiamo inutilmente la matrice $R_k$ che però ha dimensioni più piccole rispetto alla R prima generata
+
+\subsection*{[Slide -> Metodi di Krylov nell'elettronica(I)]}
+Vediamo uno dei possibili settori in cui vengono utilizzati i metodi di krylov. Non a caso scegliamo un esempio a noi caro, i circuiti analogici. 
+Esistono circuiti aventi centinaia di componenti ognuno dei quali è descritto da molteplici equazioni.
+Consideriamo il generico circuito analogico descritto da un totale N equazioni che rappresento col sistema Ax = b.
+Come primo tentativo usiamo l’eliminazione di Gauss, così facendo scriveremmo un algoritmo richiedente un numero di flops che cresce come $N^3$. Proviamo allora ad utilizzare dei metodi iterativi:
+molti metodi iterativi tra cui il GMRES riescono a ridurre il numero di flops a circa $N^2$, ma esiste un metodo ancora più vantaggioso che ci porta a dover compiere un numero di operazioni che cresce come N; questo metodo è il GMRES matrix free.
+Che differenza si ha tra il GMRES standard e quello matrix free? Perché il metodo matrix free ci permette di risparmiare così tanto?
+Per trovare la risposta a queste domande consideriamo il seguente circuito
+
+\subsection*{[Slide -> Metodi di Krylov nell'elettronica(II)]}
+Un circuito così piccolo forma una matrice sparsa, allora sarete tutti d’accordo se dovessi dire che circuiti con centinaia di nodi formeranno matrici con ancora più valori nulli dato che è praticamente impossibile collegarli tutti assieme. Il GMRES Matrix Free ci consente di memorizzare solo i valori non nulli di A assieme al loro indirizzo nella matrice: quindi in memoria avremo una struttura del tipo: valore, numero di riga, numero colonna.
+ Per esempio il valore -G1 che si trova nella riga 1 seconda colonna di A lo memorizzeremmo come -G1, 1, 2.
+Così facendo si risparmia molto spazio e i calcoli in cui si utilizza la matrice A richiederanno molti meno flops
+
+
+\subsection*{Slide -> Immagine}
+Nell’immagine vedete i vari metodi messi a confronto. Le prime due colonne dicono rispettivamente il nome del componente e il numero di equazioni che lo descrivono. Le 3 colonne successive rappresentano il tempo in secondi impiegato per risolvere il circuito rispettivamente con eliminazione di gauss, GMRES e GMRES matrix free infine l’ultima colonna mette a confronto l’eliminazione di Gauss con il gmres matrix free
 
 \end{document}
